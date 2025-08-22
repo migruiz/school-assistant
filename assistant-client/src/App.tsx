@@ -1,34 +1,17 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-
-function App() {
-  const [count, setCount] = useState(0)
-
+import { AssistantRuntimeProvider } from "@assistant-ui/react";
+import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
+import { ThreadList } from "@/components/assistant-ui/thread-list";
+import { Thread } from "@/components/assistant-ui/thread";
+const App = () => {
+  const runtime = useChatRuntime();
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <AssistantRuntimeProvider runtime={runtime}>
+      <div className="grid h-dvh grid-cols-[200px_1fr] gap-x-2 px-4 py-4">
+        <ThreadList />
+        <Thread />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </AssistantRuntimeProvider>
+  );
+};
 
 export default App
