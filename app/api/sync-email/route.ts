@@ -1,34 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
-// TODO: Replace with your actual credentials and token logic
-const CLIENT_ID = process.env.GMAIL_CLIENT_ID || '';
-const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET || '';
-const REDIRECT_URI = process.env.GMAIL_REDIRECT_URI || '';
-const REFRESH_TOKEN = process.env.RETNS_GMAIL_REFRESH_TOKEN || '';
 
-const oAuth2Client = new google.auth.OAuth2(
-  CLIENT_ID,
-  CLIENT_SECRET,
-  REDIRECT_URI
-);
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+// Initialize Firebase Admin SDK if not already initialized
+if (!getApps().length) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
+    initializeApp({ credential: cert(serviceAccount) });
+}
 
-export async function POST(req: NextRequest) {
-  try {
-    // Connect to Gmail API
-    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-
-    // Fetch the last 5 emails from the inbox
-    const res = await gmail.users.messages.list({
-      userId: 'me',
-      maxResults: 3,
-      labelIds: ['INBOX'],
-      q: '',
-    });
-
-    const messages = res.data.messages || [];
-    const emailDetails = [];
+const db = getFirestore();
 
 
     function getHeader(headers: any[] | undefined, name: string): string | undefined {
@@ -81,6 +63,66 @@ export async function POST(req: NextRequest) {
       return match ? match[1] : from;
     }
 
+
+
+export async function POST(req: NextRequest) {
+  try {
+    const docGmailAppCredentialsRef = db.collection('gmailAppCredentials').doc('default');
+    const docSnapGmailApp = await docGmailAppCredentialsRef.get();
+    if (!docSnapGmailApp.exists) {
+      return NextResponse.json({ success: false, error: 'Gmail credentials not found in Firestore.' }, { status: 500 });
+    }
+    const gmailAppCreds = docSnapGmailApp.data();
+    if (!gmailAppCreds) {
+      return NextResponse.json({ success: false, error: 'Gmail credentials data is undefined in Firestore.' }, { status: 500 });
+    }
+    const CLIENT_ID = gmailAppCreds.clientId;
+    const CLIENT_SECRET = gmailAppCreds.clientSecret;
+    const REDIRECT_URI = gmailAppCreds.redirectUri;
+
+
+    const monitoredEmailsRef = db.collection('monitoredEmails');
+    const monitoredEmailsSnap = await monitoredEmailsRef.get();
+    const emailDetails = [];
+    for (const doc of monitoredEmailsSnap.docs) {
+      const { email, gmailRefreshToken, validSenders } = doc.data();
+      console.log(`Monitored Email: ${email}, Refresh Token: ${gmailRefreshToken}, Valid Senders: ${validSenders}`);
+
+
+
+
+
+
+
+
+
+
+
+    const REFRESH_TOKEN = gmailRefreshToken;
+
+    const oAuth2Client = new google.auth.OAuth2(
+      CLIENT_ID,
+      CLIENT_SECRET,
+      REDIRECT_URI
+    );
+    oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+    // Connect to Gmail API
+    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+
+    // Fetch the last 3 emails from the inbox
+    const res = await gmail.users.messages.list({
+      userId: 'me',
+      maxResults: 3,
+      labelIds: ['INBOX'],
+      q: '',
+    });
+
+    const messages = res.data.messages || [];
+    
+
+
+
     for (const msg of messages) {
       const msgRes = await gmail.users.messages.get({ userId: 'me', id: msg.id! });
       const payload = msgRes.data.payload;
@@ -96,6 +138,15 @@ export async function POST(req: NextRequest) {
         sender,
       });
     }
+
+
+
+
+
+
+    }
+
+
 
     return NextResponse.json({ success: true, emails: emailDetails });
   } catch (error) {
