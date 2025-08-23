@@ -5,7 +5,7 @@ import { google } from 'googleapis';
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID || '';
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET || '';
 const REDIRECT_URI = process.env.GMAIL_REDIRECT_URI || '';
-const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN || '';
+const REFRESH_TOKEN = process.env.RETNS_GMAIL_REFRESH_TOKEN || '';
 
 const oAuth2Client = new google.auth.OAuth2(
   CLIENT_ID,
