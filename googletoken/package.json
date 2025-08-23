@@ -1,0 +1,8 @@
+{
+  "name": "school-assistant-google-token",
+  "version": "0.1.0",
+  "dependencies": {
+   
+    "googleapis": "^157.0.0"
+  }
+}
