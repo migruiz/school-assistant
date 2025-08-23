@@ -19,8 +19,28 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
+import { useEffect, useRef } from "react";
 export const Assistant = () => {
   const runtime = useChatRuntime();
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+    // Scroll to bottom
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    // Scroll on initial render
+    scrollToBottom();
+
+    // Scroll when window resizes (keyboard opens/closes on Android)
+    const handleResize = () => {
+      scrollToBottom();
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
@@ -51,6 +71,7 @@ export const Assistant = () => {
           </SidebarInset>
         </div>
       </SidebarProvider>
+      <div ref={bottomRef} />
     </AssistantRuntimeProvider>
   );
 };
