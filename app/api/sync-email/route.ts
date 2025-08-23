@@ -85,67 +85,111 @@ export async function POST(req: NextRequest) {
     const monitoredEmailsSnap = await monitoredEmailsRef.get();
     const emailDetails = [];
     for (const doc of monitoredEmailsSnap.docs) {
-      const { email, gmailRefreshToken, validSenders } = doc.data();
-      console.log(`Monitored Email: ${email}, Refresh Token: ${gmailRefreshToken}, Valid Senders: ${validSenders}`);
+      const { email, gmailRefreshToken, validSenders, lastHistoryId } = doc.data();
+      console.log(`Monitored Email: ${email}, Refresh Token: ${gmailRefreshToken}, Valid Senders: ${validSenders}, Last HistoryId: ${lastHistoryId}`);
 
+      const REFRESH_TOKEN = gmailRefreshToken;
+      const oAuth2Client = new google.auth.OAuth2(
+        CLIENT_ID,
+        CLIENT_SECRET,
+        REDIRECT_URI
+      );
+      oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
+      // Connect to Gmail API
+      const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
+      let newLastHistoryId = lastHistoryId;
+      let newMessages: any[] = [];
 
+      try {
+        if (lastHistoryId) {
+          // Use history.list to get changes since lastHistoryId
+          const historyRes = await gmail.users.history.list({
+            userId: 'me',
+            startHistoryId: lastHistoryId,
+            historyTypes: ['messageAdded'],
+            labelId: 'INBOX',
+            maxResults: 20,
+          });
+          const history = historyRes.data.history || [];
+          // Collect new message IDs
+          const messageIds = new Set<string>();
+          for (const h of history) {
+            if (h.messagesAdded) {
+              for (const m of h.messagesAdded) {
+                if (m.message && m.message.id) {
+                  messageIds.add(m.message.id);
+                }
+              }
+            }
+          }
+          // Fetch new messages
+          for (const id of messageIds) {
+            const msgRes = await gmail.users.messages.get({ userId: 'me', id });
+            const payload = msgRes.data.payload;
+            const subject = getHeader(payload?.headers, 'Subject') || '';
+            const body = getBody(payload);
+            const receivedAt = getDate(payload?.headers) || '';
+            const sender = getSender(payload?.headers) || '';
+            newMessages.push({
+              id,
+              subject,
+              body,
+              receivedAt,
+              sender,
+            });
+          }
+          // Update lastHistoryId if present
+          if (historyRes.data.historyId) {
+            newLastHistoryId = historyRes.data.historyId;
+          }
+        } else {
+          // First sync: fetch last 3 messages and get their historyId
+          const res = await gmail.users.messages.list({
+            userId: 'me',
+            maxResults: 3,
+            labelIds: ['INBOX'],
+            q: '',
+          });
+          const messages = res.data.messages || [];
+          for (const msg of messages) {
+            const msgRes = await gmail.users.messages.get({ userId: 'me', id: msg.id! });
+            const payload = msgRes.data.payload;
+            const subject = getHeader(payload?.headers, 'Subject') || '';
+            const body = getBody(payload);
+            const receivedAt = getDate(payload?.headers) || '';
+            const sender = getSender(payload?.headers) || '';
+            newMessages.push({
+              id: msg.id,
+              subject,
+              body,
+              receivedAt,
+              sender,
+            });
+          }
+          // Get the latest historyId from the most recent message
+          if (messages.length > 0) {
+            const latestMsg = await gmail.users.messages.get({ userId: 'me', id: messages[0].id! });
+            if (latestMsg.data.historyId) {
+              newLastHistoryId = latestMsg.data.historyId;
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error during Gmail sync:', err);
+      }
 
+      // Add new messages to emailDetails
+      for (const m of newMessages) {
+        emailDetails.push(m);
+      }
 
-
-
-
-
-
-    const REFRESH_TOKEN = gmailRefreshToken;
-
-    const oAuth2Client = new google.auth.OAuth2(
-      CLIENT_ID,
-      CLIENT_SECRET,
-      REDIRECT_URI
-    );
-    oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-
-    // Connect to Gmail API
-    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-
-    // Fetch the last 3 emails from the inbox
-    const res = await gmail.users.messages.list({
-      userId: 'me',
-      maxResults: 3,
-      labelIds: ['INBOX'],
-      q: '',
-    });
-
-    const messages = res.data.messages || [];
-    
-
-
-
-    for (const msg of messages) {
-      const msgRes = await gmail.users.messages.get({ userId: 'me', id: msg.id! });
-      const payload = msgRes.data.payload;
-      const subject = getHeader(payload?.headers, 'Subject') || '';
-      const body = getBody(payload);
-      const receivedAt = getDate(payload?.headers) || '';
-      const sender = getSender(payload?.headers) || '';
-      emailDetails.push({
-        id: msg.id,
-        subject,
-        body,
-        receivedAt,
-        sender,
-      });
+      // Update lastHistoryId in Firestore if changed
+      if (newLastHistoryId && newLastHistoryId !== lastHistoryId) {
+        await doc.ref.update({ lastHistoryId: newLastHistoryId });
+      }
     }
-
-
-
-
-
-
-    }
-
 
 
     return NextResponse.json({ success: true, emails: emailDetails });
