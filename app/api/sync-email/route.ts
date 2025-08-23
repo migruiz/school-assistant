@@ -4,13 +4,7 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 
-// Initialize Firebase Admin SDK if not already initialized
-if (!getApps().length) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
-    initializeApp({ credential: cert(serviceAccount) });
-}
 
-const db = getFirestore();
 
 
     function getHeader(headers: any[] | undefined, name: string): string | undefined {
@@ -66,6 +60,13 @@ const db = getFirestore();
 
 
 export async function POST(req: NextRequest) {
+  // Initialize Firebase Admin SDK if not already initialized
+if (!getApps().length) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
+    initializeApp({ credential: cert(serviceAccount) });
+}
+
+const db = getFirestore();
   try {
     const docGmailAppCredentialsRef = db.collection('gmailAppCredentials').doc('default');
     const docSnapGmailApp = await docGmailAppCredentialsRef.get();
