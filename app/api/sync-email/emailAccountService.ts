@@ -48,7 +48,7 @@ export  function getGmailApiClient(gmailAppCredentials: { clientId: string; clie
 }
 
 
-export async function getEmailAccountToSync(db: FirebaseFirestore.Firestore): Promise<{ email: string; gmailRefreshToken: string; lastHistoryId: string; validSenders: string; emailAccountId: string; }[]> {
+export async function getEmailsAccountToSync(db: FirebaseFirestore.Firestore): Promise<{ email: string; gmailRefreshToken: string; lastHistoryId: string; validSenders: string; emailAccountId: string; }[]> {
     const monitoredEmailsRef = db.collection('monitoredEmails');
     const monitoredEmailsSnap = await monitoredEmailsRef.get();
     return monitoredEmailsSnap.docs.map(doc => {

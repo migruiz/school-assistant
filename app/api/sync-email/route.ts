@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getFirestoreDatabase, getEmailAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient } from './credentialsFactory'
-import { getAddedEmails, getEmailDetails, getLast3Emails } from './emailParser'
+import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient } from './emailAccountService'
+import { getAddedEmails,  getLast3Emails } from './emailsService'
 
 
 
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
   const db = await getFirestoreDatabase();
   const gmailAppCredentials = await getGmailAppCredentials(db);
-  const emailsAccountsToSync = await getEmailAccountToSync(db);
+  const emailsAccountsToSync = await getEmailsAccountToSync(db);
 
   if (!gmailAppCredentials) {
     throw new Error('Gmail app credentials not found');

@@ -98,7 +98,7 @@ export async function getLast3Emails(gmail: gmail_v1.Gmail) {
 
 
 
-export async function getEmailDetails(gmail: gmail_v1.Gmail, messageId: string) {
+async function getEmailDetails(gmail: gmail_v1.Gmail, messageId: string) {
     const msgRes = await gmail.users.messages.get({ userId: 'me', id: messageId });
     const payload = msgRes.data.payload;
     const subject = getHeader(payload?.headers, 'Subject') || '';
