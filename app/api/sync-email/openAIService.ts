@@ -18,13 +18,27 @@ export async function importEmails(openAIKey: string, vectorStoreId: string, vec
     }
 
 
-    for (const email of emails) {
-        const uploadable: Uploadable = new File([JSON.stringify(email)], `${email.subject}-${email.id}.json`, { type: "application/json" });
+    for (const email of emails.reverse()) {
+        const dataToUpload = {
+            date: email.receivedAt,
+            summary: email.subject,
+            content: email.body,
+        };
+        const uploadable: Uploadable = new File([JSON.stringify(dataToUpload)], `${email.subject}-${email.id}.json`, { type: "application/json" });
         const uploadedFile = await client.vectorStores.files.uploadAndPoll(
             vectorStore.id,
             uploadable
         );
-        console.log("Uploaded file:", JSON.stringify(uploadedFile, null, 2));
+
+        const attributesUploaded  = await client.vectorStores.files.update(uploadedFile.id, {
+            vector_store_id: vectorStore.id,
+            attributes: {
+                sender: email.sender,
+                receivedAt: new Date(email.receivedAt).getTime(),
+            },
+        });
+
+        console.log("Uploaded Data:", JSON.stringify({uploadedFile, attributesUploaded}, null, 2));
     }
 
 
