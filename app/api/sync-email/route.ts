@@ -3,13 +3,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient } from './emailAccountService'
 import { getAddedEmails,  getLast3Emails } from './emailsService'
 import {importEmails} from './openAIService'
+import {getSchools} from "./schoolsService"
 
 
 
 export async function POST(req: NextRequest) {
 
-  const db = await getFirestoreDatabase();
+  const db = await getFirestoreDatabase();  
   const gmailAppCredentials = await getGmailAppCredentials(db);
+
+  const schools = await getSchools(db);
+  return NextResponse.json({ schools });
+
   const emailsAccountsToSync = await getEmailsAccountToSync(db);
 
   if (!gmailAppCredentials) {
