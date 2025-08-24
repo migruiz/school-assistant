@@ -50,7 +50,7 @@ export  function getGmailApiClient(gmailAppCredentials: { clientId: string; clie
 }
 
 
-export async function getEmailsAccountToSync(db: FirebaseFirestore.Firestore, schoolId: string): Promise<{ email: string; gmailRefreshToken: string; lastHistoryId: string; validSenders: string; emailAccountId: string; }[]> {
+export async function getEmailsAccountToSync(db: FirebaseFirestore.Firestore, schoolId: string): Promise<{ email: string; gmailRefreshToken: string; lastHistoryId: string; validSenders: string; emailAccountId: string; openaiVectorStore: string; purpose: string }[]> {
     const monitoredEmailsRef = db.collection('schools').doc(schoolId).collection('monitoredEmails');
     const monitoredEmailsSnap = await monitoredEmailsRef.get();
     return monitoredEmailsSnap.docs.map(doc => {
@@ -60,7 +60,9 @@ export async function getEmailsAccountToSync(db: FirebaseFirestore.Firestore, sc
             email: data.email,
             gmailRefreshToken: data.gmailRefreshToken,
             lastHistoryId: data.lastHistoryId,
-            validSenders: data.validSenders
+            validSenders: data.validSenders,
+            openaiVectorStore: data.openaiVectorStore,
+            purpose: data.purpose
         };
     });
 }

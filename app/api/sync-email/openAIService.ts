@@ -1,14 +1,19 @@
 import OpenAI, { Uploadable } from "openai";
-export async function importEmails(email: any) {
-    return
-    const client = new OpenAI();
+export async function importEmails(openAIKey: string, vectorStoreId: string, vectorStoreName: string, email: any) {
+    const client = new OpenAI({ apiKey: openAIKey });
 
-    const vector_store = await client.vectorStores.create({   // Create vector store
-        name: "Support FAQ",
-    });
+    let vectorStore;
+    if (!vectorStoreId) {
+        vectorStore = await client.vectorStores.create({   // Create vector store
+            name: vectorStoreName,
+        });
+    }
+    else{
+        vectorStore = await client.vectorStores.retrieve(vectorStoreId);
+    }
     const uploadable: Uploadable = new File([JSON.stringify(email)], "inputTEST.txt", { type: "text/plain" });
     await client.vectorStores.files.uploadAndPoll(
-        vector_store.id,
+        vectorStore.id,
         uploadable
     );
 }

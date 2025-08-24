@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         emailsToSync = emails;
       }
 
-      importEmails(emailsToSync);
+      importEmails(school.openAIKey, emailAccountToSync.openaiVectorStore, emailAccountToSync.purpose, emailsToSync);
 
       // Update lastHistoryId in Firestore if changed
       if (historyIdToSync && historyIdToSync !== emailAccountToSync.lastHistoryId) {
