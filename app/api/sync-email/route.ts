@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient } from './emailAccountService'
 import { getAddedEmails,  getLast3Emails } from './emailsService'
+import {importEmails} from './openAIService'
 
 
 
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
         emailsToSync = emails;
       }
 
-      //sync here
+      importEmails(emailsToSync);
 
       // Update lastHistoryId in Firestore if changed
       if (historyIdToSync && historyIdToSync !== emailAccountToSync.lastHistoryId) {
