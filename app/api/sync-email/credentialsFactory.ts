@@ -1,6 +1,6 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-
+import { gmail_v1, google } from 'googleapis';
 
 
 export async function getGmailAppCredentials(db: FirebaseFirestore.Firestore): Promise<{ clientId: string; clientSecret: string, redirectUri:string }> {
@@ -33,6 +33,20 @@ export async function getFirestoreDatabase() {
     const db = getFirestore();
     return db;
 }
+
+export  function getGmailApiClient(gmailAppCredentials: { clientId: string; clientSecret: string, redirectUri:string }, gmailRefreshToken: string) : gmail_v1.Gmail {
+    const oAuth2Client = new google.auth.OAuth2(
+        gmailAppCredentials.clientId,
+        gmailAppCredentials.clientSecret,
+        gmailAppCredentials.redirectUri
+      );
+      oAuth2Client.setCredentials({ refresh_token: gmailRefreshToken });
+
+      // Connect to Gmail API
+      const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+      return gmail;
+}
+
 
 export async function getEmailAccountToSync(db: FirebaseFirestore.Firestore): Promise<{ email: string; gmailRefreshToken: string; lastHistoryId: string; validSenders: string; emailAccountId: string; }[]> {
     const monitoredEmailsRef = db.collection('monitoredEmails');
