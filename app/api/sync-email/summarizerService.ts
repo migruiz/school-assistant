@@ -1,4 +1,4 @@
-import OpenAI, { Uploadable } from "openai";
+import OpenAI from "openai";
 export async function summarizeForSemanticSearch(openAIKey: string, content: any) {
     // Initialize OpenAI client with your API key
     const openai = new OpenAI({

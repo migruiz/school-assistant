@@ -1,19 +1,28 @@
 import { openai } from "@ai-sdk/openai";
+import { z } from 'zod';
 import {
   streamText,
   UIMessage,
   convertToModelMessages,
+  tool
 } from "ai";
+import { queryVectorStore } from './semanticSearchService'
+import { getFirestoreDatabase, getOpenAIKey } from './openAIDataService'
 
 export async function POST(req: Request) {
+  const db = await getFirestoreDatabase();
+  const schoolId = "retns"; 
+  const vectorStoreId = "vs_68ab66d4649c8191bc17c7beddc5e9e9"; 
+  const openAIKey = await getOpenAIKey(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
-    model: openai("gpt-4o"),
-    providerOptions:{
-      openai:{
+    model: openai("gpt-4o-mini"),
+    providerOptions: {
+      openai: {
+        apiKey: openAIKey,
       }
     },
-    system:`
+    system: `
 - Assist parents of Rathcoole Educate Together National School by providing accurate answers to questions about  all notices sent by the principal.
 - Ensure responses are clear, concise, and easy for parents to understand.
 - Reference only notices when answering queries.
@@ -29,9 +38,19 @@ export async function POST(req: Request) {
     `,
     messages: convertToModelMessages(messages),
     tools: {
-      file_search: openai.tools.fileSearch({vectorStoreIds: ['vs_68a7a07d66fc8191b9666c3d763e6dc5']}),
+      file_search: tool({
+        description: 'Perform a semantic search in the school announcements',
+        inputSchema: z.string().describe('The query to search for in the announcements'),
+        execute: performSemanticSearch,
+      }),
     },
   });
+  async function performSemanticSearch(query: string) {
+    const results = await queryVectorStore(openAIKey, query, vectorStoreId);
+    return results;
+  }
 
   return result.toUIMessageStreamResponse();
 }
+
+
