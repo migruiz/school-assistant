@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient } from './emailAccountService'
+import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient, updateEmailAccountWithVectorStoreId } from './emailAccountService'
 import { getAddedEmails, getLast3Emails } from './emailsService'
 import { importEmails } from './openAIService'
 import { getSchools } from "./schoolsService"
@@ -39,7 +39,15 @@ export async function POST(req: NextRequest) {
         emailsToSync = emails;
       }
 
-      importEmails(school.openAIKey, emailAccountToSync.openaiVectorStore, emailAccountToSync.purpose, emailsToSync);
+      const createdVectorStoreId = await importEmails(school.openAIKey, emailAccountToSync.openaiVectorStore, emailAccountToSync.purpose, emailsToSync);
+      if (createdVectorStoreId){
+        await updateEmailAccountWithVectorStoreId({
+          db,
+          schoolId: school.id,
+          emailAccountId: emailAccountToSync.emailAccountId,
+          vectorStoreId: createdVectorStoreId
+        });
+      }
 
       // Update lastHistoryId in Firestore if changed
       if (historyIdToSync && historyIdToSync !== emailAccountToSync.lastHistoryId) {

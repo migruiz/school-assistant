@@ -25,7 +25,21 @@ export async function updateLastHistoryId({
     await emailDocRef.update({ lastHistoryId: newLastHistoryId });
 }
 
-
+export async function updateEmailAccountWithVectorStoreId({
+    db,
+    schoolId,
+    emailAccountId,
+    vectorStoreId
+}: {
+    db: FirebaseFirestore.Firestore,
+    schoolId: string,
+    emailAccountId: string,
+    vectorStoreId: string
+}): Promise<void> {
+    const monitoredEmailsRef = db.collection('schools').doc(schoolId).collection('monitoredEmails');
+    const emailDocRef = monitoredEmailsRef.doc(emailAccountId);
+    await emailDocRef.update({ vectorStoreId });
+}
 
 export async function getFirestoreDatabase() {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
