@@ -1,4 +1,5 @@
 import OpenAI, { Uploadable } from "openai";
+import {summarizeForSemanticSearch} from './summarizerService'
 export async function importEmails(openAIKey: string, vectorStoreId: string, vectorStoreName: string, emails: any) {
     if (emails.length === 0) {
         return null;
@@ -19,10 +20,17 @@ export async function importEmails(openAIKey: string, vectorStoreId: string, vec
 
 
     for (const email of emails.reverse()) {
+        const summaryData = await summarizeForSemanticSearch(openAIKey, {
+            subject: email.subject,
+            body: email.body
+        });
         const dataToUpload = {
             date: email.receivedAt,
-            summary: email.subject,
+            subject: summaryData.subject,
+            summary: summaryData.summary,
+            categories: summaryData.categories.join(","),
             content: email.body,
+            
         };
         const uploadable: Uploadable = new File([JSON.stringify(dataToUpload)], `${email.subject}-${email.id}.json`, { type: "application/json" });
         const uploadedFile = await client.vectorStores.files.uploadAndPoll(
@@ -37,8 +45,8 @@ export async function importEmails(openAIKey: string, vectorStoreId: string, vec
                 receivedAt: new Date(email.receivedAt).getTime(),
             },
         });
-
-        console.log("Uploaded Data:", JSON.stringify({uploadedFile, attributesUploaded}, null, 2));
+        console.log("Uploaded Data:", JSON.stringify(dataToUpload, null, 2));
+        console.log("Result:", JSON.stringify({uploadedFile, attributesUploaded}, null, 2));
     }
 
 
