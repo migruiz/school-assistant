@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         emailsToSync = emails;
       }
 
-      const createdVectorStoreId = await importEmails(school.openAIKey, emailAccountToSync.openaiVectorStore, emailAccountToSync.purpose, emailsToSync);
+      const createdVectorStoreId = await importEmails(school.openAIKey, emailAccountToSync.vectorStoreId, emailAccountToSync.purpose, emailsToSync);
       if (createdVectorStoreId){
         await updateEmailAccountWithVectorStoreId({
           db,
