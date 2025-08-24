@@ -11,14 +11,16 @@ export async function getGmailAppCredentials(db: FirebaseFirestore.Firestore): P
 
 export async function updateLastHistoryId({
     db,
+    schoolId,
     emailAccountId,
     newLastHistoryId
 }: {
     db: FirebaseFirestore.Firestore,
+    schoolId: string,
     emailAccountId: string,
     newLastHistoryId: string
 }): Promise<void> {
-    const monitoredEmailsRef = db.collection('monitoredEmails');
+    const monitoredEmailsRef = db.collection('schools').doc(schoolId).collection('monitoredEmails');
     const emailDocRef = monitoredEmailsRef.doc(emailAccountId);
     await emailDocRef.update({ lastHistoryId: newLastHistoryId });
 }
@@ -48,8 +50,8 @@ export  function getGmailApiClient(gmailAppCredentials: { clientId: string; clie
 }
 
 
-export async function getEmailsAccountToSync(db: FirebaseFirestore.Firestore): Promise<{ email: string; gmailRefreshToken: string; lastHistoryId: string; validSenders: string; emailAccountId: string; }[]> {
-    const monitoredEmailsRef = db.collection('monitoredEmails');
+export async function getEmailsAccountToSync(db: FirebaseFirestore.Firestore, schoolId: string): Promise<{ email: string; gmailRefreshToken: string; lastHistoryId: string; validSenders: string; emailAccountId: string; }[]> {
+    const monitoredEmailsRef = db.collection('schools').doc(schoolId).collection('monitoredEmails');
     const monitoredEmailsSnap = await monitoredEmailsRef.get();
     return monitoredEmailsSnap.docs.map(doc => {
         const data = doc.data();

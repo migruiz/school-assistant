@@ -1,27 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient } from './emailAccountService'
-import { getAddedEmails,  getLast3Emails } from './emailsService'
-import {importEmails} from './openAIService'
-import {getSchools} from "./schoolsService"
+import { getAddedEmails, getLast3Emails } from './emailsService'
+import { importEmails } from './openAIService'
+import { getSchools } from "./schoolsService"
 
 
 
 export async function POST(req: NextRequest) {
 
-  const db = await getFirestoreDatabase();  
+  const db = await getFirestoreDatabase();
   const gmailAppCredentials = await getGmailAppCredentials(db);
 
   const schools = await getSchools(db);
-  return NextResponse.json({ schools });
+  for (const school of schools) {
 
-  const emailsAccountsToSync = await getEmailsAccountToSync(db);
+    const emailsAccountsToSync = await getEmailsAccountToSync(db, school.id);
 
-  if (!gmailAppCredentials) {
-    throw new Error('Gmail app credentials not found');
-  }
+    if (!gmailAppCredentials) {
+      throw new Error('Gmail app credentials not found');
+    }
 
-  try {
 
     for (const emailAccountToSync of emailsAccountsToSync) {
       const gmail = getGmailApiClient(gmailAppCredentials, emailAccountToSync.gmailRefreshToken);
@@ -46,6 +45,7 @@ export async function POST(req: NextRequest) {
       if (historyIdToSync && historyIdToSync !== emailAccountToSync.lastHistoryId) {
         await updateLastHistoryId({
           db,
+          schoolId: school.id,
           emailAccountId: emailAccountToSync.emailAccountId,
           newLastHistoryId: historyIdToSync
         });
@@ -53,8 +53,12 @@ export async function POST(req: NextRequest) {
     }
 
 
-    return NextResponse.json({ success: true, emails: [] });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+
   }
+
+
+
+
+
+  return NextResponse.json({ success: true, emails: [] });
 }
