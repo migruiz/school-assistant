@@ -179,12 +179,12 @@ const Composer: FC = () => {
         <ThreadWelcomeSuggestions />
       </ThreadPrimitive.Empty>
       {/* aui-composer-root */}
-      <ComposerPrimitive.Root className="focus-within::ring-offset-2 relative flex w-full flex-col rounded-2xl focus-within:ring-2 focus-within:ring-black dark:focus-within:ring-white">
+      <ComposerPrimitive.Root className="focus-within::ring-offset-2 relative flex w-full flex-row rounded-2xl focus-within:ring-2 focus-within:ring-black dark:focus-within:ring-white">
         {/* aui-composer-input */}
         <ComposerPrimitive.Input
           placeholder="Send a message..."
           className={
-            "bg-muted border-border dark:border-muted-foreground/15 focus:outline-primary placeholder:text-muted-foreground max-h-[calc(50dvh)]  w-full resize-none rounded-t-2xl border-x border-t px-4 pt-2  text-base outline-none"
+            "bg-muted border-border dark:border-muted-foreground/15 focus:outline-primary placeholder:text-muted-foreground max-h-[calc(50dvh)]  w-full resize-none rounded-t-2xl rounded-b-2xl border-x border-t px-4 pt-2 pb-2 text-base outline-none"
           }
           rows={1}
           enterKeyHint="send"
@@ -195,7 +195,38 @@ const Composer: FC = () => {
           }}
           aria-label="Message input"
         />
-        <ComposerAction />
+        <div className="pt-1 px-1">
+          <ThreadPrimitive.If running={false}>
+            <ComposerPrimitive.Send asChild>
+              <Button
+                type="submit"
+                variant="default"
+                // aui-composer-send
+                className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
+                aria-label="Send message"
+              >
+                {/* aui-composer-send-icon */}
+                <ArrowUpIcon className="size-5" />
+              </Button>
+            </ComposerPrimitive.Send>
+          </ThreadPrimitive.If>
+
+          <ThreadPrimitive.If running>
+            <ComposerPrimitive.Cancel asChild>
+              <Button
+                type="button"
+                variant="default"
+                // aui-composer-cancel
+                className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
+                aria-label="Stop generating"
+              >
+                {/* aui-composer-cancel-icon */}
+                <Square className="size-3.5 fill-white dark:size-4 dark:fill-black" />
+              </Button>
+            </ComposerPrimitive.Cancel>
+          </ThreadPrimitive.If>
+
+        </div>
       </ComposerPrimitive.Root>
     </div>
   );
@@ -205,47 +236,7 @@ const ComposerAction: FC = () => {
   return (
     // aui-composer-action-wrapper
     <div className="bg-muted border-border dark:border-muted-foreground/15 relative flex items-center justify-between rounded-b-2xl border-x border-b p-2">
-      <TooltipIconButton
-        tooltip="Attach file"
-        variant="ghost"
-        // aui-composer-attachment-button
-        className="hover:bg-foreground/15 dark:hover:bg-background/50 scale-115 p-3.5"
-        onClick={() => {
-          console.log("Attachment clicked - not implemented");
-        }}
-      >
-        <PlusIcon />
-      </TooltipIconButton>
 
-      <ThreadPrimitive.If running={false}>
-        <ComposerPrimitive.Send asChild>
-          <Button
-            type="submit"
-            variant="default"
-            // aui-composer-send
-            className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
-            aria-label="Send message"
-          >
-            {/* aui-composer-send-icon */}
-            <ArrowUpIcon className="size-5" />
-          </Button>
-        </ComposerPrimitive.Send>
-      </ThreadPrimitive.If>
-
-      <ThreadPrimitive.If running>
-        <ComposerPrimitive.Cancel asChild>
-          <Button
-            type="button"
-            variant="default"
-            // aui-composer-cancel
-            className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
-            aria-label="Stop generating"
-          >
-            {/* aui-composer-cancel-icon */}
-            <Square className="size-3.5 fill-white dark:size-4 dark:fill-black" />
-          </Button>
-        </ComposerPrimitive.Cancel>
-      </ThreadPrimitive.If>
     </div>
   );
 };
