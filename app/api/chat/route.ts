@@ -8,14 +8,14 @@ import {
   stepCountIs
 } from "ai";
 import { queryVectorStore } from './semanticSearchService'
-import { getFirestoreDatabase, getOpenAIKey } from './openAIDataService'
-import { getSchoolCalendar } from './schoolCalendarService'
+import { getFirestoreDatabase, getSchoolInfo } from './openAIDataService'
+import {queryGeneralInfoVectorStore} from './generalInfoService'
 
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
   const vectorStoreId = "vs_68ab66d4649c8191bc17c7beddc5e9e9";
-  const openAIKey = await getOpenAIKey(db, schoolId);
+  const { openAIKey, schoolCalendar, generalInfoVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
     model: openai("gpt-5-nano"),
@@ -52,7 +52,14 @@ export async function POST(req: Request) {
       schoolCalendar: tool({
         description: 'Use this when asked about the school calendar or school holidays or closures',
         inputSchema: z.object({}),
-        execute: async () => await getSchoolCalendar(db, schoolId),
+        execute:  () => schoolCalendar
+      }),
+      generalInfoSearch: tool({
+        description: 'Perform a semantic search in the general information vector store like childcare information, school policies, and other general inquiries',
+        inputSchema: z.object({
+          query: z.string().describe('The query to search for in the general information'),
+        }),
+        execute: async ({ query }) => await queryGeneralInfoVectorStore(openAIKey, query, generalInfoVectorStoreId),
       }),
     },
   });

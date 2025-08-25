@@ -2,11 +2,18 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 
-export async function getOpenAIKey(db: FirebaseFirestore.Firestore, schoolId: string): Promise<string> {
+export async function getSchoolInfo(
+    db: FirebaseFirestore.Firestore,
+    schoolId: string
+): Promise<{ openAIKey: string; schoolCalendar: string; generalInfoVectorStoreId: string }> {
     const schoolDataRef = db.collection('schools').doc(schoolId);
     const docSnap = await schoolDataRef.get();
     const data = docSnap.data();
-    return data?.openAIKey as string;
+    if (!data) {
+        throw new Error(`School with ID ${schoolId} not found.`);
+    }
+    const { openAIKey, schoolCalendar, generalInfoVectorStoreId } = data;
+    return { openAIKey, schoolCalendar, generalInfoVectorStoreId };
 }
 
 
