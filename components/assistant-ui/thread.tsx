@@ -188,6 +188,11 @@ const Composer: FC = () => {
           }
           rows={1}
           enterKeyHint="send"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.currentTarget.blur();
+            }
+          }}
           aria-label="Message input"
         />
         <ComposerAction />
