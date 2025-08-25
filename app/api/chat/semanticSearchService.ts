@@ -31,15 +31,15 @@ function formatResults(data:any) {
   let result ="";
 
   data.forEach((dataItem: any, index:number) => {
-    result += `${index + 1}. Result:\n`;
+    result += `${index + 1}. Search Result:\n`;
 
     dataItem.forEach((contentItem: any) => {
       if (contentItem.type === "text") {
-        result += `   - "${contentItem.text}"\n`;
+        result += `${contentItem.text}"\n\n`;
       }
     });
 
-    result += "\n";
+    result += "\n\n\n\n";
   });
 
   return result.trim();
