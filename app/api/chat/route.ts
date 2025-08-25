@@ -4,7 +4,8 @@ import {
   streamText,
   UIMessage,
   convertToModelMessages,
-  tool
+  tool,
+  stepCountIs
 } from "ai";
 import { queryVectorStore } from './semanticSearchService'
 import { getFirestoreDatabase, getOpenAIKey } from './openAIDataService'
@@ -37,16 +38,21 @@ export async function POST(req: Request) {
 - Decline to answer any questions unrelated to  official notices.
     `,
     messages: convertToModelMessages(messages),
+    stopWhen: stepCountIs(5),
     tools: {
-      file_search: tool({
+      
+      announcementsSearch: tool({
         description: 'Perform a semantic search in the school announcements',
-        inputSchema: z.string().describe('The query to search for in the announcements'),
-        execute: performSemanticSearch,
+        inputSchema: z.object({
+          query: z.string().describe('The query to search for in the announcements'),
+        }),
+        execute: async ({ query }) => await performSemanticSearch({ query }),
       }),
     },
   });
-  async function performSemanticSearch(query: string) {
+  async function performSemanticSearch({ query }: { query: string }) {
     const results = await queryVectorStore(openAIKey, query, vectorStoreId);
+    console.log(JSON.stringify(results, null, 2));
     return results;
   }
 
