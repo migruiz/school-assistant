@@ -187,7 +187,7 @@ const Composer: FC = () => {
             "bg-muted border-border dark:border-muted-foreground/15 focus:outline-primary placeholder:text-muted-foreground max-h-[calc(50dvh)]  w-full resize-none rounded-t-2xl border-x border-t px-4 pt-2  text-base outline-none"
           }
           rows={1}
-          autoFocus
+          enterKeyHint="send"
           aria-label="Message input"
         />
         <ComposerAction />
