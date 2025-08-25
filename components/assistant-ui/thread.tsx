@@ -7,6 +7,7 @@ import {
   ErrorPrimitive,
 } from "@assistant-ui/react";
 import type { FC } from "react";
+import Image from "next/image";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -84,6 +85,17 @@ const ThreadWelcome: FC = () => {
         <div className="flex w-full flex-grow flex-col items-center justify-center">
           {/* aui-thread-welcome-message */}
           <div className="flex size-full flex-col justify-center px-8 md:mt-20">
+
+            <div className="flex items-center">
+              <Image
+                src="https://mockmind-api.uifaces.co/content/cartoon/13.jpg"   // Place your image in the /public folder
+                alt="User Avatar"
+                width={128}
+                height={128}
+                className="rounded-full border border-gray-300"
+              />
+            </div>
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -128,7 +140,7 @@ const ThreadWelcomeSuggestions: FC = () => {
       {[
         {
           title: "Is the School Open",
-          label:"Tomorrow?",
+          label: "Tomorrow?",
           action: "Is the School Open Tomorrow?",
         },
         {
