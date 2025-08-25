@@ -7,6 +7,7 @@ import {
   ErrorPrimitive,
 } from "@assistant-ui/react";
 import type { FC } from "react";
+import Image from "next/image";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -83,7 +84,25 @@ const ThreadWelcome: FC = () => {
         {/* aui-thread-welcome-center */}
         <div className="flex w-full flex-grow flex-col items-center justify-center">
           {/* aui-thread-welcome-message */}
+                     <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ delay: 0.5 }}
+              // aui-thread-welcome-message-motion-1
+                className="flex items-center  mt-18">
+            <Image
+              src="/robot_retns.jpg"   // Place your image in the /public folder
+              alt="User Avatar"
+              width={128}
+              height={128}
+              className="rounded-full border border-gray-300"
+            />
+          </motion.div>
           <div className="flex size-full flex-col justify-center px-8 md:mt-20">
+
+
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -102,6 +121,16 @@ const ThreadWelcome: FC = () => {
               // aui-thread-welcome-message-motion-2
               className="text-muted-foreground/65 text-2xl"
             >
+              I am your Rathcoole Educate Together School AI Assistant.
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ delay: 0.6 }}
+              // aui-thread-welcome-message-motion-2
+              className="text-muted-foreground/65 text-2xl mt-8"
+            >
               How can I help you today?
             </motion.div>
           </div>
@@ -117,24 +146,24 @@ const ThreadWelcomeSuggestions: FC = () => {
     <div className="grid w-full gap-2 sm:grid-cols-2">
       {[
         {
-          title: "What are the advantages",
-          label: "of using Assistant Cloud?",
-          action: "What are the advantages of using Assistant Cloud?",
+          title: "Is the School Open",
+          label: "Tomorrow?",
+          action: "Is the School Open Tomorrow?",
         },
         {
-          title: "Write code to",
-          label: `demonstrate topological sorting`,
-          action: `Write code to demonstrate topological sorting`,
+          title: "List the School Class",
+          label: "Teachers",
+          action: `List the school teachers`,
         },
         {
-          title: "Help me write an essay",
-          label: `about AI chat applications`,
-          action: `Help me write an essay about AI chat applications`,
+          title: "Where is the School",
+          label: `Located?`,
+          action: `Where is the school located?`,
         },
         {
-          title: "What is the weather",
-          label: "in San Francisco?",
-          action: "What is the weather in San Francisco?",
+          title: "Show me the most recent",
+          label: "School News",
+          action: "What is the latest school news?",
         },
       ].map((suggestedAction, index) => (
         <motion.div
@@ -179,18 +208,54 @@ const Composer: FC = () => {
         <ThreadWelcomeSuggestions />
       </ThreadPrimitive.Empty>
       {/* aui-composer-root */}
-      <ComposerPrimitive.Root className="focus-within::ring-offset-2 relative flex w-full flex-col rounded-2xl focus-within:ring-2 focus-within:ring-black dark:focus-within:ring-white">
+      <ComposerPrimitive.Root className="focus-within::ring-offset-2 relative flex w-full flex-row rounded-2xl focus-within:ring-2 focus-within:ring-black dark:focus-within:ring-white">
         {/* aui-composer-input */}
         <ComposerPrimitive.Input
-          placeholder="Send a message..."
+          placeholder="Ask me..."
           className={
-            "bg-muted border-border dark:border-muted-foreground/15 focus:outline-primary placeholder:text-muted-foreground max-h-[calc(50dvh)] min-h-16 w-full resize-none rounded-t-2xl border-x border-t px-4 pt-2 pb-3 text-base outline-none"
+            "bg-muted border-border dark:border-muted-foreground/15 focus:outline-primary placeholder:text-muted-foreground max-h-[calc(50dvh)]  w-full resize-none rounded-t-2xl rounded-b-2xl border-x border-t px-4 pt-2 pb-2 text-base outline-none"
           }
           rows={1}
-          autoFocus
+          enterKeyHint="send"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.currentTarget.blur();
+            }
+          }}
           aria-label="Message input"
         />
-        <ComposerAction />
+        <div className="pt-1 px-1">
+          <ThreadPrimitive.If running={false}>
+            <ComposerPrimitive.Send asChild>
+              <Button
+                type="submit"
+                variant="default"
+                // aui-composer-send
+                className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
+                aria-label="Send message"
+              >
+                {/* aui-composer-send-icon */}
+                <ArrowUpIcon className="size-5" />
+              </Button>
+            </ComposerPrimitive.Send>
+          </ThreadPrimitive.If>
+
+          <ThreadPrimitive.If running>
+            <ComposerPrimitive.Cancel asChild>
+              <Button
+                type="button"
+                variant="default"
+                // aui-composer-cancel
+                className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
+                aria-label="Stop generating"
+              >
+                {/* aui-composer-cancel-icon */}
+                <Square className="size-3.5 fill-white dark:size-4 dark:fill-black" />
+              </Button>
+            </ComposerPrimitive.Cancel>
+          </ThreadPrimitive.If>
+
+        </div>
       </ComposerPrimitive.Root>
     </div>
   );
@@ -200,47 +265,7 @@ const ComposerAction: FC = () => {
   return (
     // aui-composer-action-wrapper
     <div className="bg-muted border-border dark:border-muted-foreground/15 relative flex items-center justify-between rounded-b-2xl border-x border-b p-2">
-      <TooltipIconButton
-        tooltip="Attach file"
-        variant="ghost"
-        // aui-composer-attachment-button
-        className="hover:bg-foreground/15 dark:hover:bg-background/50 scale-115 p-3.5"
-        onClick={() => {
-          console.log("Attachment clicked - not implemented");
-        }}
-      >
-        <PlusIcon />
-      </TooltipIconButton>
 
-      <ThreadPrimitive.If running={false}>
-        <ComposerPrimitive.Send asChild>
-          <Button
-            type="submit"
-            variant="default"
-            // aui-composer-send
-            className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
-            aria-label="Send message"
-          >
-            {/* aui-composer-send-icon */}
-            <ArrowUpIcon className="size-5" />
-          </Button>
-        </ComposerPrimitive.Send>
-      </ThreadPrimitive.If>
-
-      <ThreadPrimitive.If running>
-        <ComposerPrimitive.Cancel asChild>
-          <Button
-            type="button"
-            variant="default"
-            // aui-composer-cancel
-            className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
-            aria-label="Stop generating"
-          >
-            {/* aui-composer-cancel-icon */}
-            <Square className="size-3.5 fill-white dark:size-4 dark:fill-black" />
-          </Button>
-        </ComposerPrimitive.Cancel>
-      </ThreadPrimitive.If>
     </div>
   );
 };
@@ -268,8 +293,14 @@ const AssistantMessage: FC = () => {
         data-role="assistant"
       >
         {/* aui-assistant-message-avatar */}
-        <div className="ring-border bg-background col-start-1 row-start-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1">
-          <StarIcon size={14} />
+        <div className="ring-border bg-background col-start-1 row-start-1 flex size-10 shrink-0 items-center justify-center rounded-full ring-1">
+          <Image
+            src="/robot_retns.jpg"   // Place your image in the /public folder
+            alt="User Avatar"
+            width={128}
+            height={128}
+            className="rounded-full border border-gray-300"
+          />
         </div>
 
         {/* aui-assistant-message-content */}

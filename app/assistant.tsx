@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
@@ -24,7 +24,7 @@ export const Assistant = () => {
   const runtime = useChatRuntime();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-    // Scroll to bottom
+  // Scroll to bottom
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -53,14 +53,16 @@ export const Assistant = () => {
               <Separator orientation="vertical" className="mr-2 h-4" />
               <Breadcrumb>
                 <BreadcrumbList>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="https://www.assistant-ui.com/docs/getting-started" target="_blank" rel="noopener noreferrer">
-                      Build Your Own ChatGPT UX
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Starter Template</BreadcrumbPage>
+                                <Image
+                                  src="/retns_logo.avif"   // Place your image in the /public folder
+                                  alt="User Avatar"
+                                  width={48}
+                                  height={48}
+                                />
+                  </BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Rathcoole Educate Together AI Assistant</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
