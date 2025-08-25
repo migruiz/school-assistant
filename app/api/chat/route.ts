@@ -9,11 +9,12 @@ import {
 } from "ai";
 import { queryVectorStore } from './semanticSearchService'
 import { getFirestoreDatabase, getOpenAIKey } from './openAIDataService'
+import { getSchoolCalendar } from './schoolCalendarService'
 
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
-  const schoolId = "retns"; 
-  const vectorStoreId = "vs_68ab66d4649c8191bc17c7beddc5e9e9"; 
+  const schoolId = "retns";
+  const vectorStoreId = "vs_68ab66d4649c8191bc17c7beddc5e9e9";
   const openAIKey = await getOpenAIKey(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
@@ -40,13 +41,18 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
-      
+
       announcementsSearch: tool({
         description: 'Perform a semantic search in the school announcements',
         inputSchema: z.object({
           query: z.string().describe('The query to search for in the announcements'),
         }),
         execute: async ({ query }) => await performSemanticSearch({ query }),
+      }),
+      schoolCalendar: tool({
+        description: 'Use this when asked about the school calendar or school holidays or closures',
+        inputSchema: z.object({}),
+        execute: async () => await getSchoolCalendar(db, schoolId),
       }),
     },
   });

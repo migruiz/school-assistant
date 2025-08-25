@@ -1,8 +1,8 @@
 const { google } = require('googleapis');
 const oAuth2Client = new google.auth.OAuth2(
-  'YOUR_CLIENT_ID',
-  'YOUR_CLIENT_SECRET',
-  'YOUR_REDIRECT_URI'
+  '564895268744-guki0rcqlpuullgklf4959140ucmlr5g.apps.googleusercontent.com',
+  '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',
+  'http://localhost:3000/api/oauth2callback'
 );
 
 const authUrl = oAuth2Client.generateAuthUrl({
@@ -12,8 +12,8 @@ const authUrl = oAuth2Client.generateAuthUrl({
 console.log('Authorize this app by visiting this url:', authUrl);
 
 
-const code = 'PASTE_CODE_HERE';
-oAuth2Client.getToken(CODE).then(({ tokens }) => {
+const code = '4/0AVMBsJjJx1SSzKpSx5pldpCuUWxm-P1hLXPHXzRC2tgLliqNkt2rCoHLr1VLmYdm9FWJMg';
+oAuth2Client.getToken(code).then(({ tokens }) => {
   console.log('Refresh token:', tokens.refresh_token);
 });
 
