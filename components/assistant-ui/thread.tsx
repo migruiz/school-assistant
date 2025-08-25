@@ -102,6 +102,16 @@ const ThreadWelcome: FC = () => {
               // aui-thread-welcome-message-motion-2
               className="text-muted-foreground/65 text-2xl"
             >
+              I am your AI assistant for Rathcoole Educate Together National School.
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ delay: 0.6 }}
+              // aui-thread-welcome-message-motion-2
+              className="text-muted-foreground/65 text-2xl mt-8"
+            >
               How can I help you today?
             </motion.div>
           </div>
@@ -117,24 +127,24 @@ const ThreadWelcomeSuggestions: FC = () => {
     <div className="grid w-full gap-2 sm:grid-cols-2">
       {[
         {
-          title: "What are the advantages",
-          label: "of using Assistant Cloud?",
-          action: "What are the advantages of using Assistant Cloud?",
+          title: "Is the School Open",
+          label:"Tomorrow?",
+          action: "Is the School Open Tomorrow?",
         },
         {
-          title: "Write code to",
-          label: `demonstrate topological sorting`,
-          action: `Write code to demonstrate topological sorting`,
+          title: "List the School Class",
+          label: "Teachers",
+          action: `List the school teachers`,
         },
         {
-          title: "Help me write an essay",
-          label: `about AI chat applications`,
-          action: `Help me write an essay about AI chat applications`,
+          title: "Where is the School",
+          label: `Located?`,
+          action: `Where is the school located?`,
         },
         {
-          title: "What is the weather",
-          label: "in San Francisco?",
-          action: "What is the weather in San Francisco?",
+          title: "Show me the most recent",
+          label: "School News",
+          action: "What is the latest school news?",
         },
       ].map((suggestedAction, index) => (
         <motion.div
@@ -182,7 +192,7 @@ const Composer: FC = () => {
       <ComposerPrimitive.Root className="focus-within::ring-offset-2 relative flex w-full flex-row rounded-2xl focus-within:ring-2 focus-within:ring-black dark:focus-within:ring-white">
         {/* aui-composer-input */}
         <ComposerPrimitive.Input
-          placeholder="Send a message..."
+          placeholder="Ask me..."
           className={
             "bg-muted border-border dark:border-muted-foreground/15 focus:outline-primary placeholder:text-muted-foreground max-h-[calc(50dvh)]  w-full resize-none rounded-t-2xl rounded-b-2xl border-x border-t px-4 pt-2 pb-2 text-base outline-none"
           }
