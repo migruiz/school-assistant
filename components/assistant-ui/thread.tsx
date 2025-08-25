@@ -84,17 +84,24 @@ const ThreadWelcome: FC = () => {
         {/* aui-thread-welcome-center */}
         <div className="flex w-full flex-grow flex-col items-center justify-center">
           {/* aui-thread-welcome-message */}
+                     <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ delay: 0.5 }}
+              // aui-thread-welcome-message-motion-1
+                className="flex items-center  mt-18">
+            <Image
+              src="/robot_retns.jpg"   // Place your image in the /public folder
+              alt="User Avatar"
+              width={128}
+              height={128}
+              className="rounded-full border border-gray-300"
+            />
+          </motion.div>
           <div className="flex size-full flex-col justify-center px-8 md:mt-20">
 
-            <div className="flex items-center">
-              <Image
-                src="https://mockmind-api.uifaces.co/content/cartoon/13.jpg"   // Place your image in the /public folder
-                alt="User Avatar"
-                width={128}
-                height={128}
-                className="rounded-full border border-gray-300"
-              />
-            </div>
+
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -114,7 +121,7 @@ const ThreadWelcome: FC = () => {
               // aui-thread-welcome-message-motion-2
               className="text-muted-foreground/65 text-2xl"
             >
-              I am your AI assistant for Rathcoole Educate Together National School.
+              I am your Rathcoole Educate Together School AI Assistant.
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -286,8 +293,14 @@ const AssistantMessage: FC = () => {
         data-role="assistant"
       >
         {/* aui-assistant-message-avatar */}
-        <div className="ring-border bg-background col-start-1 row-start-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1">
-          <StarIcon size={14} />
+        <div className="ring-border bg-background col-start-1 row-start-1 flex size-10 shrink-0 items-center justify-center rounded-full ring-1">
+          <Image
+            src="/robot_retns.jpg"   // Place your image in the /public folder
+            alt="User Avatar"
+            width={128}
+            height={128}
+            className="rounded-full border border-gray-300"
+          />
         </div>
 
         {/* aui-assistant-message-content */}
