@@ -9,7 +9,8 @@ export async function queryGeneralInfoVectorStore(openAIKey: string, userQuery: 
         generalInfoVectorStoreId,
         {
             query: userQuery,
-            rewrite_query: true
+            rewrite_query: true,
+            max_num_results: 5
         }
     );
     const data = results.data.map(item => item.content);

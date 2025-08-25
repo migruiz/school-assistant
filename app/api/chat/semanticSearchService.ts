@@ -10,7 +10,8 @@ export async function queryVectorStore(openAIKey: string, userQuery: any, vector
         vectorStoreId,
         {
             query: userQuery,
-            rewrite_query: true
+            rewrite_query: true,
+            max_num_results: 5
         }
     );
     const filteredResults = results.data.map(item => ({

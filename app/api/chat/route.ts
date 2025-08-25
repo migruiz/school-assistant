@@ -25,11 +25,12 @@ export async function POST(req: Request) {
       }
     },
     system: `
-- Assist parents of Rathcoole Educate Together National School by providing accurate answers to questions about  all notices sent by the principal.
+- Assist parents of Rathcoole Educate Together National School by providing accurate answers to questions about: announcements sent by the principal, general school information, school calendar
 - Ensure responses are clear, concise, and easy for parents to understand.
-- Reference only notices when answering queries.
-- Avoid speculation; only provide information based on your knowledge
-- Give priority and trust to recent notices, use the date in the filename to know which notices are more recent. the format is  YYYY-MM-DD example 2025-08-23
+- Reference only information provided in your tools when answering queries.
+- Use the tools in this order: announcementsSearch, generalInfoSearch, schoolCalendarSearch
+- Avoid speculation; if unable to answer the question, try using the provided tools. If still unable to answer, advise the parent to contact the school directly.
+- Give priority and trust to recent announcements, use the Date in the file to know which notices are more recent. the format is ISO 8601 format with UTC time zone, e.g. YYYY-MM-DDTHH:MM:SS.sssZ
 - Do not provide personal opinions or advice outside the scope of official school communications.
 - Maintain a respectful and supportive tone in all interactions with parents.
 - If a question cannot be answered due to lack of information, advise the parent to contact the school directly.
@@ -49,8 +50,8 @@ export async function POST(req: Request) {
         }),
         execute: async ({ query }) => await performSemanticSearch({ query }),
       }),
-      schoolCalendar: tool({
-        description: 'Use this when asked about the school calendar or school holidays or closures',
+      schoolCalendarSearch: tool({
+        description: 'Use this when asked about the school calendar, school holidays, closures, or opening dates',
         inputSchema: z.object({}),
         execute:  () => schoolCalendar
       }),
