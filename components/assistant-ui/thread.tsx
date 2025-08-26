@@ -223,7 +223,9 @@ const Composer: FC = () => {
     // aui-composer-wrapper
     <div className="bg-background relative mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 px-[var(--thread-padding-x)] pb-4 md:pb-6">
       <ThreadScrollToBottom />
-      <ComposerNewThread />
+      <ThreadPrimitive.If empty={false}>
+        <ComposerNewThread />
+      </ThreadPrimitive.If>
 
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions />
