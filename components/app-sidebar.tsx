@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { ThreadList } from "./assistant-ui/thread-list"
+import Image from "next/image";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -20,39 +20,47 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-                <Link href="https://assistant-ui.com" target="_blank">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <MessagesSquare className="size-4" />
-                  </div>
-                  <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">assistant-ui</span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
+              <Link href="https://www.rathcooleetns.ie" target="_blank">
+                <div className="flex size-8 items-center justify-center rounded-lg ">
+                  <Image
+                    src="/retns_logo.avif"   // Place your image in the /public folder
+                    alt="RETNS"
+                    width={48}
+                    height={48}
+                  />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">RETNS AI Assistant</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <ThreadList />
       </SidebarContent>
-      
+
       <SidebarRail />
       <SidebarFooter>
         <SidebarMenu>
-         
+
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="https://github.com/assistant-ui/assistant-ui" target="_blank">
+              <div>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Github className="size-4" />
+                  <Image
+                    src="/tenjotech128.jpg"   // Place your image in the /public folder
+                    alt="TenjoTech"
+                    width={128}
+                    height={128}
+                  />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">GitHub</span>
-                  <span className="">View Source</span>
+                  <span className="font-semibold">Developed by Tenjotech Ltd.</span>
                 </div>
-              </Link>
+              </div>
             </SidebarMenuButton>
-            
+
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

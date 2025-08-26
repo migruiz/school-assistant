@@ -5,6 +5,7 @@ import {
   ActionBarPrimitive,
   BranchPickerPrimitive,
   ErrorPrimitive,
+  ThreadListPrimitive,
 } from "@assistant-ui/react";
 import type { FC } from "react";
 import Image from "next/image";
@@ -84,13 +85,13 @@ const ThreadWelcome: FC = () => {
         {/* aui-thread-welcome-center */}
         <div className="flex w-full flex-grow flex-col items-center justify-center">
           {/* aui-thread-welcome-message */}
-                     <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ delay: 0.5 }}
-              // aui-thread-welcome-message-motion-1
-                className="flex items-center  mt-18">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ delay: 0.5 }}
+            // aui-thread-welcome-message-motion-1
+            className="flex items-center  mt-18">
             <Image
               src="/robot_retns.jpg"   // Place your image in the /public folder
               alt="User Avatar"
@@ -199,11 +200,33 @@ const ThreadWelcomeSuggestions: FC = () => {
   );
 };
 
+const ComposerNewThread: FC = () => {
+  return (
+    <ThreadListPrimitive.New asChild>
+
+      <TooltipIconButton
+        tooltip="New Thread"
+        variant="default"
+        // aui-thread-scroll-to-bottom
+        className="dark:bg-background dark:hover:bg-accent absolute -top-12 z-10  rounded-full p-4"
+      >
+        <PlusIcon />
+      </TooltipIconButton>
+
+    </ThreadListPrimitive.New>
+  );
+};
+
+
 const Composer: FC = () => {
   return (
     // aui-composer-wrapper
     <div className="bg-background relative mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 px-[var(--thread-padding-x)] pb-4 md:pb-6">
       <ThreadScrollToBottom />
+      <ThreadPrimitive.If empty={false}>
+        <ComposerNewThread />
+      </ThreadPrimitive.If>
+
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions />
       </ThreadPrimitive.Empty>
@@ -293,7 +316,7 @@ const AssistantMessage: FC = () => {
         data-role="assistant"
       >
         {/* aui-assistant-message-avatar */}
-        <div className="ring-border bg-background col-start-1 row-start-1 flex size-10 shrink-0 items-center justify-center rounded-full ring-1">
+        <div className="ring-border bg-background col-start-1 row-start-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1">
           <Image
             src="/robot_retns.jpg"   // Place your image in the /public folder
             alt="User Avatar"
