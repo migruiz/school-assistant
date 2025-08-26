@@ -206,7 +206,7 @@ const ComposerNewThread: FC = () => {
 
       <TooltipIconButton
         tooltip="New Thread"
-        variant="outline"
+        variant="default"
         // aui-thread-scroll-to-bottom
         className="dark:bg-background dark:hover:bg-accent absolute -top-12 z-10  rounded-full p-4"
       >
