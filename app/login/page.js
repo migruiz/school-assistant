@@ -1,9 +1,6 @@
 'use client';
-import dynamic from 'next/dynamic';
+import FirebaseAuthUI from '../../components/FirebaseAuthUI';
 
-const FirebaseAuthUI = dynamic(() => import('../../components/FirebaseAuthUI'), {
-  ssr: false // Disable SSR for this component
-});
 
 export default function Login() {
   return (
