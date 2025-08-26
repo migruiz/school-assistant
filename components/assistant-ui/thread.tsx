@@ -293,7 +293,7 @@ const AssistantMessage: FC = () => {
         data-role="assistant"
       >
         {/* aui-assistant-message-avatar */}
-        <div className="ring-border bg-background col-start-1 row-start-1 flex size-10 shrink-0 items-center justify-center rounded-full ring-1">
+        <div className="ring-border bg-background col-start-1 row-start-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1">
           <Image
             src="/robot_retns.jpg"   // Place your image in the /public folder
             alt="User Avatar"
