@@ -12,6 +12,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import Image from "next/image";
+import { ThreadList } from "./assistant-ui/thread-list";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -38,6 +39,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+          <ThreadList />
       </SidebarContent>
 
       <SidebarRail />

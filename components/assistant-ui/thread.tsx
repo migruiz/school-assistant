@@ -22,8 +22,9 @@ import {
   Square,
   User2Icon,
   UserIcon,
+  LogInIcon,
 } from "lucide-react";
-
+import Link from "next/link"
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -53,13 +54,13 @@ export const Thread: FC = () => {
 
 
 
-        <ThreadPrimitive.Messages
+        {user && <ThreadPrimitive.Messages
           components={{
             UserMessage,
             EditComposer,
             AssistantMessage,
           }}
-        />
+        />}
 
         <ThreadPrimitive.If empty={false}>
           {/* aui-thread-viewport-spacer */}
@@ -67,7 +68,7 @@ export const Thread: FC = () => {
         </ThreadPrimitive.If>
       </ThreadPrimitive.Viewport>
 
-      <Composer />
+      {user && <Composer />}
     </ThreadPrimitive.Root>
   );
 };
@@ -146,10 +147,23 @@ const ThreadWelcome: FC = () => {
             >
               How can I help you today?
             </motion.div>}
-            {!user && <Button className="data-active:bg-muted hover:bg-muted flex items-center justify-start gap-1 rounded-lg px-2.5 py-2 text-start" variant="link">
-              <UserIcon />
-              LOGIN
-            </Button>}
+            {!user &&
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ delay: 0.6 }}
+                // aui-thread-welcome-message-motion-2
+                className="flex w-full  flex-col items-center justify-center mt-16"
+              >
+                <Link href="/login">
+                  <Button className="flex bg-green-500 text-white  gap-1 rounded-lg px-2.5 py-2 " variant="link">
+                    <LogInIcon />
+                    LOGIN
+                  </Button>
+                </Link>
+              </motion.div>
+            }
           </div>
         </div>
       </div>
