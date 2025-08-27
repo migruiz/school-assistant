@@ -5,67 +5,68 @@ import { useRouter } from 'next/navigation';
 
 import firebase from '../lib/firebase';
 
-const AuthContext = createContext({ user: null, loading: true, demoLogin: () => {}, logout: () => {} });
+const AuthContext = createContext({ user: null, loading: true, demoLogin: () => { }, logout: () => { } });
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const demoLogin = async () => {
-    await firebase.auth().signInAnonymously();
-  };
-  const logout = async () => {
-    await firebase.auth().signOut();
-  };
-  useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged(async (firebaseUser) => {
-      if (!firebaseUser) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const demoLogin = async () => {
+        await firebase.auth().signInAnonymously();
+    };
+    const logout = async () => {
+        await firebase.auth().currentUser.delete().catch(() => { });
+        await firebase.auth().signOut();
+    };
+    useEffect(() => {
+        const unsubscribe = firebase.auth().onAuthStateChanged(async (firebaseUser) => {
+            if (!firebaseUser) {
+                setUser(null);
+                setLoading(false);
+                return;
+            }
 
-      try {
-        // Get fresh ID token for backend validation
-        const idToken = await firebaseUser.getIdToken(true);
+            try {
+                // Get fresh ID token for backend validation
+                const idToken = await firebaseUser.getIdToken(true);
 
-        const res = await fetch('/api/auth', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`,
-          },
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`,
+                    },
+                });
+
+                const { valid } = await res.json();
+
+                if (!valid) {
+                    // Delete user if backend says invalid
+                    await firebaseUser.delete().catch(() => { });
+                    await firebase.auth().signOut();
+                    setUser(null);
+                    console.log('User deleted');
+                    router.push('/');
+                } else {
+                    setUser(firebaseUser); // valid user
+                }
+            } catch (err) {
+                console.error('Auth validation failed', err);
+                await firebaseUser.delete().catch(() => { });
+                await firebase.auth().signOut();
+                setUser(null);
+                router.push('/');
+            } finally {
+                setLoading(false);
+            }
         });
 
-        const { valid } = await res.json();
+        return () => unsubscribe();
+    }, [router]);
 
-        if (!valid) {
-          // Delete user if backend says invalid
-          await firebaseUser.delete().catch(() => {});
-          await firebase.auth().signOut();
-          setUser(null);
-          console.log('User deleted');
-          router.push('/');
-        } else {
-          setUser(firebaseUser); // valid user
-        }
-      } catch (err) {
-        console.error('Auth validation failed', err);
-        await firebaseUser.delete().catch(() => {});
-        await firebase.auth().signOut();
-        setUser(null);
-        router.push('/');        
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  return <AuthContext.Provider value={{ user, loading, demoLogin, logout }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ user, loading, demoLogin, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+    return useContext(AuthContext);
 }
