@@ -28,6 +28,9 @@ jobs:
           npm install
           npm run build 
 
+      - name: Remove Next.js cache
+        run: rm -rf .next/cache
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
