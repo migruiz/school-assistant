@@ -20,6 +20,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   Square,
+  User2Icon,
+  UserIcon,
 } from "lucide-react";
 
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
@@ -29,7 +31,13 @@ import { cn } from "@/lib/utils";
 import { MarkdownText } from "./markdown-text";
 import { ToolFallback } from "./tool-fallback";
 
+import { useAuth } from '../../context/AuthContext';
+
+
 export const Thread: FC = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
   return (
     <ThreadPrimitive.Root
       // aui-thread-root
@@ -42,6 +50,8 @@ export const Thread: FC = () => {
       {/* aui-thread-viewport */}
       <ThreadPrimitive.Viewport className="relative flex min-w-0 flex-1 flex-col gap-6 overflow-y-scroll">
         <ThreadWelcome />
+
+
 
         <ThreadPrimitive.Messages
           components={{
@@ -78,6 +88,8 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
+  const { user, loading } = useAuth();
+
   return (
     <ThreadPrimitive.Empty>
       {/* aui-thread-welcome-root */}
@@ -124,7 +136,7 @@ const ThreadWelcome: FC = () => {
             >
               I am your Rathcoole Educate Together School AI Assistant.
             </motion.div>
-            <motion.div
+            {user && <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -133,7 +145,11 @@ const ThreadWelcome: FC = () => {
               className="text-muted-foreground/65 text-2xl mt-8"
             >
               How can I help you today?
-            </motion.div>
+            </motion.div>}
+            {!user && <Button className="data-active:bg-muted hover:bg-muted flex items-center justify-start gap-1 rounded-lg px-2.5 py-2 text-start" variant="link">
+              <UserIcon />
+              LOGIN
+            </Button>}
           </div>
         </div>
       </div>

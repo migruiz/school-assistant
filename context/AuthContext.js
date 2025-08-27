@@ -17,7 +17,6 @@ export function AuthProvider({ children }) {
       if (!firebaseUser) {
         setUser(null);
         setLoading(false);
-        router.push('/login');
         return;
       }
 
@@ -41,7 +40,7 @@ export function AuthProvider({ children }) {
           await firebase.auth().signOut();
           setUser(null);
           console.log('User deleted');
-          router.push('/login');
+          router.push('/');
         } else {
           setUser(firebaseUser); // valid user
         }
@@ -50,7 +49,7 @@ export function AuthProvider({ children }) {
         await firebaseUser.delete().catch(() => {});
         await firebase.auth().signOut();
         setUser(null);
-        router.push('/login');
+        router.push('/');
       } finally {
         setLoading(false);
       }
