@@ -164,8 +164,9 @@ const ThreadWelcome: FC = () => {
                   </Button>
                 </Link>
                   <Button className="flex bg-blue-500 text-white  gap-1 rounded-lg px-2.5 py-2 ml-4" 
-                  onClick={()=>{
-                    demoLogin();
+                  onClick={async (e)=>{
+                    e.preventDefault();
+                    await demoLogin();
                   }}
                   >
                     <LockOpenIcon />

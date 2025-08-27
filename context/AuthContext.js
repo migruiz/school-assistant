@@ -5,16 +5,17 @@ import { useRouter } from 'next/navigation';
 
 import firebase from '../lib/firebase';
 
-const AuthContext = createContext({ user: null, loading: true, demoLogin: () => {} });
+const AuthContext = createContext({ user: null, loading: true, demoLogin: () => {}, logout: () => {} });
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  
-  const demoLogin = () => {
-    debugger
-    firebase.auth().signInAnonymously();
+  const demoLogin = async () => {
+    await firebase.auth().signInAnonymously();
+  };
+  const logout = async () => {
+    await firebase.auth().signOut();
   };
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(async (firebaseUser) => {
@@ -62,7 +63,7 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, [router]);
 
-  return <AuthContext.Provider value={{ user, loading, demoLogin }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, demoLogin, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
