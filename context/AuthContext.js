@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
         // Get fresh ID token for backend validation
         const idToken = await firebaseUser.getIdToken(true);
 
-        const res = await fetch('/api/validate-phone', {
+        const res = await fetch('/api/auth', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
           await firebaseUser.delete().catch(() => {});
           await firebase.auth().signOut();
           setUser(null);
+          console.log('User deleted');
           router.push('/login');
         } else {
           setUser(firebaseUser); // valid user
