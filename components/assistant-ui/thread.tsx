@@ -39,7 +39,7 @@ import { useAuth } from '../../context/AuthContext';
 export const Thread: FC = () => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div></div>;
   return (
     <ThreadPrimitive.Root
       // aui-thread-root

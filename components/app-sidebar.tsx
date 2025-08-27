@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image";
 import { ThreadList } from "./assistant-ui/thread-list";
+import { useAuth } from "@/context/AuthContext";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user, loading } = useAuth();
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -39,7 +41,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-          <ThreadList />
+        {user && <ThreadList />}
       </SidebarContent>
 
       <SidebarRail />
