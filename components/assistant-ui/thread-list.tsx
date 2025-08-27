@@ -3,16 +3,30 @@ import {
   ThreadListItemPrimitive,
   ThreadListPrimitive,
 } from "@assistant-ui/react";
-import { ArchiveIcon, PlusIcon } from "lucide-react";
+import { ArchiveIcon, LogOutIcon, PlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export const ThreadList: FC = () => {
+  const { logout } = useAuth();
   return (
     <ThreadListPrimitive.Root className="flex flex-col items-stretch gap-1.5">
       <ThreadListNew />
-      <ThreadListItems />
+       <Link href="/login" className="mt-8 ml-4">
+      <Button className="data-active:bg-muted hover:bg-muted flex items-center justify-start gap-1 rounded-lg px-2.5 py-2 text-start" 
+      onClick={async (e) => {
+        e.preventDefault();
+        await logout();
+      }}
+      >
+        <LogOutIcon />
+        Log Out
+      </Button>
+      
+      </Link>
     </ThreadListPrimitive.Root>
   );
 };
@@ -20,6 +34,7 @@ export const ThreadList: FC = () => {
 const ThreadListNew: FC = () => {
   return (
     <ThreadListPrimitive.New asChild>
+     
       <Button className="data-active:bg-muted hover:bg-muted flex items-center justify-start gap-1 rounded-lg px-2.5 py-2 text-start" variant="ghost">
         <PlusIcon />
         New Thread

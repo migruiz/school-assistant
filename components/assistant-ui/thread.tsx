@@ -20,8 +20,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   Square,
+  User2Icon,
+  UserIcon,
+  LogInIcon,
+  LockOpenIcon,
 } from "lucide-react";
-
+import Link from "next/link"
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -29,7 +33,13 @@ import { cn } from "@/lib/utils";
 import { MarkdownText } from "./markdown-text";
 import { ToolFallback } from "./tool-fallback";
 
+import { useAuth } from '../../context/AuthContext';
+
+
 export const Thread: FC = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div></div>;
   return (
     <ThreadPrimitive.Root
       // aui-thread-root
@@ -43,13 +53,15 @@ export const Thread: FC = () => {
       <ThreadPrimitive.Viewport className="relative flex min-w-0 flex-1 flex-col gap-6 overflow-y-scroll">
         <ThreadWelcome />
 
-        <ThreadPrimitive.Messages
+
+
+        {user && <ThreadPrimitive.Messages
           components={{
             UserMessage,
             EditComposer,
             AssistantMessage,
           }}
-        />
+        />}
 
         <ThreadPrimitive.If empty={false}>
           {/* aui-thread-viewport-spacer */}
@@ -57,7 +69,7 @@ export const Thread: FC = () => {
         </ThreadPrimitive.If>
       </ThreadPrimitive.Viewport>
 
-      <Composer />
+      {user && <Composer />}
     </ThreadPrimitive.Root>
   );
 };
@@ -78,6 +90,8 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
+  const { user, loading, demoLogin } = useAuth();
+
   return (
     <ThreadPrimitive.Empty>
       {/* aui-thread-welcome-root */}
@@ -124,7 +138,7 @@ const ThreadWelcome: FC = () => {
             >
               I am your Rathcoole Educate Together School AI Assistant.
             </motion.div>
-            <motion.div
+            {user && <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -133,7 +147,33 @@ const ThreadWelcome: FC = () => {
               className="text-muted-foreground/65 text-2xl mt-8"
             >
               How can I help you today?
-            </motion.div>
+            </motion.div>}
+            {!user &&
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ delay: 0.6 }}
+                // aui-thread-welcome-message-motion-2
+                className="flex w-full  flex-row items-center justify-center mt-16"
+              >
+                <Link href="/login">
+                  <Button className="flex bg-green-500 text-white  gap-1 rounded-lg px-2.5 py-2 " variant="link">
+                    <LogInIcon />
+                    LOGIN
+                  </Button>
+                </Link>
+                  <Button className="flex bg-blue-500 text-white  gap-1 rounded-lg px-2.5 py-2 ml-4" 
+                  onClick={async (e)=>{
+                    e.preventDefault();
+                    await demoLogin();
+                  }}
+                  >
+                    <LockOpenIcon />
+                    DEMO
+                  </Button>
+              </motion.div>
+            }
           </div>
         </div>
       </div>
