@@ -11,7 +11,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
+  
+  const demoLogin = () => {
+    debugger
+    firebase.auth().signInAnonymously();
+  };
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(async (firebaseUser) => {
       if (!firebaseUser) {
@@ -49,7 +53,7 @@ export function AuthProvider({ children }) {
         await firebaseUser.delete().catch(() => {});
         await firebase.auth().signOut();
         setUser(null);
-        router.push('/');
+        router.push('/');        
       } finally {
         setLoading(false);
       }
@@ -58,7 +62,7 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, [router]);
 
-  return <AuthContext.Provider value={{ user, loading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, demoLogin }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

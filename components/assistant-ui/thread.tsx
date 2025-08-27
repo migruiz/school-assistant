@@ -23,6 +23,7 @@ import {
   User2Icon,
   UserIcon,
   LogInIcon,
+  LockOpenIcon,
 } from "lucide-react";
 import Link from "next/link"
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
@@ -89,7 +90,7 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, demoLogin } = useAuth();
 
   return (
     <ThreadPrimitive.Empty>
@@ -154,7 +155,7 @@ const ThreadWelcome: FC = () => {
                 exit={{ opacity: 0, y: 10 }}
                 transition={{ delay: 0.6 }}
                 // aui-thread-welcome-message-motion-2
-                className="flex w-full  flex-col items-center justify-center mt-16"
+                className="flex w-full  flex-row items-center justify-center mt-16"
               >
                 <Link href="/login">
                   <Button className="flex bg-green-500 text-white  gap-1 rounded-lg px-2.5 py-2 " variant="link">
@@ -162,6 +163,14 @@ const ThreadWelcome: FC = () => {
                     LOGIN
                   </Button>
                 </Link>
+                  <Button className="flex bg-blue-500 text-white  gap-1 rounded-lg px-2.5 py-2 ml-4" 
+                  onClick={()=>{
+                    demoLogin();
+                  }}
+                  >
+                    <LockOpenIcon />
+                    DEMO
+                  </Button>
               </motion.div>
             }
           </div>
