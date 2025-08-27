@@ -1,7 +1,7 @@
+"use client";
 import { createContext, useContext, useEffect, useState } from 'react';
-import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 import firebase from '../lib/firebase';
 
@@ -46,6 +46,7 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         console.error('Auth validation failed', err);
+        await firebaseUser.delete().catch(() => {});
         await firebase.auth().signOut();
         setUser(null);
         router.push('/login');
