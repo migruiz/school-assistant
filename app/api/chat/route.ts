@@ -25,10 +25,10 @@ export async function POST(req: Request) {
       }
     },
     system: `
-- Assist parents of Rathcoole Educate Together National School by providing accurate answers to questions about: announcements sent by the principal, general school information, school calendar
+- Assist parents of Rathcoole Educate Together National School by providing accurate answers to questions about: announcements sent by the principal, teachers information, general school information, school calendar
 - Ensure responses are clear, concise, and easy for parents to understand.
 - Reference only information provided in your tools when answering queries.
-- Use the tools in this order: announcementsSearch, generalInfoSearch, schoolCalendarSearch
+- Always use these tools to get your answer in this order: announcementsSearch, schoolCalendarSearch
 - Avoid speculation; if unable to answer the question, try using the provided tools. If still unable to answer, advise the parent to contact the school directly.
 - Give priority and trust to recent announcements, use the Date in the file to know which notices are more recent. the format is ISO 8601 format with UTC time zone, e.g. YYYY-MM-DDTHH:MM:SS.sssZ
 - Do not provide personal opinions or advice outside the scope of official school communications.
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     tools: {
 
       announcementsSearch: tool({
-        description: 'Perform a semantic search in the school announcements',
+        description: 'Perform a semantic search in the school announcements, this could be  teachers information, school closures, reopenings, etc.',
         inputSchema: z.object({
           query: z.string().describe('The query to search for in the announcements'),
         }),
@@ -54,13 +54,6 @@ export async function POST(req: Request) {
         description: 'Use this when asked about the school calendar, school holidays, closures, or opening dates',
         inputSchema: z.object({}),
         execute:  () => schoolCalendar
-      }),
-      generalInfoSearch: tool({
-        description: 'Perform a semantic search in the general information vector store like childcare information, school policies, and other general inquiries',
-        inputSchema: z.object({
-          query: z.string().describe('The query to search for in the general information'),
-        }),
-        execute: async ({ query }) => await queryGeneralInfoVectorStore(openAIKey, query, generalInfoVectorStoreId),
       }),
     },
   });
