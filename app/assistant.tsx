@@ -18,10 +18,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { AssistantChatTransport } from "@assistant-ui/react-ai-sdk";
 
 import { useEffect, useRef } from "react";
 export const Assistant = () => {
-  const runtime = useChatRuntime();
+const runtime = useChatRuntime({
+  
+  transport: new AssistantChatTransport({
+   headers:{"TEST": "value" },
+   body:{
+    bodytst:"BODYTEST"
+   }
+  }),
+});
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom

@@ -16,7 +16,8 @@ export async function POST(req: Request) {
   const schoolId = "retns";
   const vectorStoreId = "vs_68ab66d4649c8191bc17c7beddc5e9e9";
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId } = await getSchoolInfo(db, schoolId);
-  const { messages }: { messages: UIMessage[] } = await req.json();
+  const request = await req.json();
+  const { messages }: { messages: UIMessage[] } = request;
   const result = streamText({
     model: openai("gpt-5-nano"),
     providerOptions: {
@@ -39,7 +40,8 @@ export async function POST(req: Request) {
 - Do not repeat the same answer to a question in consecutive messages.
 - Decline to answer any questions unrelated to  official notices.
     `,
-    messages: convertToModelMessages(messages),
+    messages: convertMMessages(messages),
+  
     stopWhen: stepCountIs(5),
     tools: {
 
@@ -70,7 +72,20 @@ export async function POST(req: Request) {
     return results;
   }
 
-  return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({
+    originalMessages: messages,
+    onFinish: ({ messages:messagesFinished }) => {
+      console.log("Chat finished. Saving chat...");
+    },
+  });
+}
+
+const convertMMessages = (messages:any[])=>{
+  const converted = convertToModelMessages(messages);
+  let last = { ...converted[converted.length - 1] };
+  last.content = "who are you";
+  last.role = "user";  
+  return [last];
 }
 
 
