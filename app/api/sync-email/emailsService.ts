@@ -82,7 +82,7 @@ export async function getLast3Emails(gmail: gmail_v1.Gmail) {
     let emails: any[] = [];
     const res = await gmail.users.messages.list({
         userId: 'me',
-        maxResults: 3,
+        maxResults: 30,
         labelIds: ['INBOX'],
         q: '',
     });
@@ -101,9 +101,10 @@ export async function getLast3Emails(gmail: gmail_v1.Gmail) {
 async function getEmailDetails(gmail: gmail_v1.Gmail, messageId: string) {
     const msgRes = await gmail.users.messages.get({ userId: 'me', id: messageId });
     const payload = msgRes.data.payload;
-    const subject = getHeader(payload?.headers, 'Subject') || '';
+    const originalSubject = getHeader(payload?.headers, 'Subject') || '';
+    const subject = extractSubject(originalSubject);
     const body = getBody(payload);
-    const receivedAt = getDate(payload?.headers) || '';
+    const receivedAt = extractReceivedAt(originalSubject, payload);
     const sender = getSender(payload?.headers) || '';
     const historyId = msgRes.data.historyId
     return {
@@ -114,4 +115,24 @@ async function getEmailDetails(gmail: gmail_v1.Gmail, messageId: string) {
         sender,
         historyId
     };
+}
+
+function extractSubject(subject:string){
+    if (subject.includes("***")) {
+        return subject.split("***")[0].trim();
+    }
+    else{
+        return subject
+    }
+}
+
+function extractReceivedAt(subject:string, payload:any){
+    if (subject.includes("***")) {
+        const dateStr = subject.split("***")[1].trim();
+        const date = new Date(dateStr);
+        return date.toISOString();
+    }
+    else{
+        return getDate(payload?.headers) || '';
+    }
 }
