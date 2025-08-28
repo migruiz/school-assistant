@@ -19,8 +19,7 @@ export async function queryVectorStore(openAIKey: string, userQuery: any, vector
         receivedAt: item.attributes?.receivedAt,
         content: item.content
     }));
-    const sortedResults = filteredResults.sort((a, b) => (a.receivedAt as number) - (b.receivedAt as number));
-    const data = sortedResults.map(item => item.content);
+    const data = filteredResults.map(item => item.content);
     const result = formatResults(data);
     return result;
 
