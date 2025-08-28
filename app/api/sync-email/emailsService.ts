@@ -82,7 +82,7 @@ export async function getLast3Emails(gmail: gmail_v1.Gmail) {
     let emails: any[] = [];
     const res = await gmail.users.messages.list({
         userId: 'me',
-        maxResults: 3,
+        maxResults: 30,
         labelIds: ['INBOX'],
         q: '',
     });

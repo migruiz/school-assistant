@@ -25,28 +25,24 @@ export async function POST(req: Request) {
       }
     },
     system: `
-- Assist parents of Rathcoole Educate Together National School by providing accurate answers to questions about: announcements sent by the principal, teachers information, general school information, school calendar
+- Assist parents of Rathcoole Educate Together National School by providing accurate answers to school queries.
+- Always use the school_knowledge_search tool when answering the queries, unless the answer is already known based on your context.
+- The semantic search result from the school_knowledge_search have these fields: Subject, Summary, Categories, and the Date of the announcement in the format of ISO 8601 format with UTC time zone, e.g. YYYY-MM-DDTHH:MM:SS.sssZ. Give more priority to recent results.
 - Ensure responses are clear, concise, and easy for parents to understand.
-- Reference only information provided in your tools when answering queries.
-- Always use these tools to get your answer in this order: announcementsSearch,
-- Avoid speculation; if unable to answer the question, try using the provided tools. If still unable to answer, advise the parent to contact the school directly.
-- Give priority and trust to recent announcements, use the Date in the file to know which notices are more recent. the format is ISO 8601 format with UTC time zone, e.g. YYYY-MM-DDTHH:MM:SS.sssZ
-- Do not provide personal opinions or advice outside the scope of official school communications.
+- Do not provide personal opinions.
 - Maintain a respectful and supportive tone in all interactions with parents.
-- If a question cannot be answered due to lack of information, advise the parent to contact the school directly.
+- If after searching in your school_knowledge_search tool, the query cannot be answered due to lack of information, advise the parent to contact the school directly.
 - Never share confidential or sensitive information about students, or families.
 - Respond only in English.
-- Do not repeat the same answer to a question in consecutive messages.
-- Decline to answer any questions unrelated to  official notices.
     `,
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
 
-      announcementsSearch: tool({
-        description: 'Perform a semantic search in the school announcements, this could be  teachers information, school closures, reopenings, etc.',
+      school_knowledge_search: tool({
+        description: 'This will perform a semantic search on the school knowledge based on the user query',
         inputSchema: z.object({
-          query: z.string().describe('The query to search for in the announcements'),
+          query: z.string().describe('The query to search'),
         }),
         execute: async ({ query }) => await performSemanticSearch({ query }),
       }),
