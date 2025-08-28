@@ -192,9 +192,9 @@ const ThreadWelcomeSuggestions: FC = () => {
           action: "Is the School Open Tomorrow?",
         },
         {
-          title: "List the School Class",
+          title: "Who are the School Class",
           label: "Teachers",
-          action: `List the school teachers`,
+          action: `Who are the school teachers`,
         },
         {
           title: "Where is the School",

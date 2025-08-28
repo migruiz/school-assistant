@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
-    model: openai("gpt-5-nano"),
+    model: openai("gpt-4o-mini"),
     providerOptions: {
       openai: {
         apiKey: openAIKey,
