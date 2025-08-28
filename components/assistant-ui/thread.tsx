@@ -187,14 +187,14 @@ const ThreadWelcomeSuggestions: FC = () => {
     <div className="grid w-full gap-2 sm:grid-cols-2">
       {[
         {
-          title: "Is the School Open",
-          label: "Tomorrow?",
-          action: "Is the School Open Tomorrow?",
+          title: "School Reopening",
+          label: "Information",
+          action: "School Reopening Information",
         },
         {
-          title: "Who are the School Class",
-          label: "Teachers",
-          action: `Who are the school teachers`,
+          title: "Does my child need to wear",
+          label: "Uniform?",
+          action: `Does my child need to wear a uniform?`,
         },
         {
           title: "Where is the School",
