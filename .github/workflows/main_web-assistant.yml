@@ -35,7 +35,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: |
+            .next
+            node_modules
+            package.json
+            package-lock.json
+            public
           include-hidden-files: true
 
   deploy:
