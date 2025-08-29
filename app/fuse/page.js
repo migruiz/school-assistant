@@ -1,10 +1,3 @@
-'use client';
+import ExampleView from './components/views/ExampleView';
 
-
-export default function Fuse() {
-  return (
-    <div>
-      Fuse
-    </div>
-  );
-}
+export default ExampleView;

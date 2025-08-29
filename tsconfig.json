@@ -19,6 +19,27 @@
       }
     ],
     "paths": {
+            "@auth/*": [
+        "./src/@auth/*"
+      ],
+      "@i18n": [
+        "./src/@i18n/index"
+      ],
+      "@i18n/*": [
+        "./src/@i18n/*"
+      ],
+      "@fuse/*": [
+        "./app/src/@fuse/*"
+      ],
+      "@history*": [
+        "./src/@history"
+      ],
+      "@mock-utils/*": [
+        "./src/@mock-utils/*"
+      ],
+      "@schema": [
+        "./src/@schema"
+      ],
       "@/*": ["./*"]
     }
   },
