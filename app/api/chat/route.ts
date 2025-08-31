@@ -27,7 +27,6 @@ export async function POST(req: Request) {
     system: `
 - Assist parents of Rathcoole Educate Together National School by providing accurate answers to school queries.
 - Always use the school_knowledge_search tool when answering the queries, unless the answer is already known based on your context.
-- The semantic search result from the school_knowledge_search have these fields: Subject, Summary, Categories, and the Date of the announcement in the format of ISO 8601 format with UTC time zone, e.g. YYYY-MM-DDTHH:MM:SS.sssZ. Give more priority to recent results.
 - Ensure responses are clear, concise, and easy for parents to understand.
 - Do not provide personal opinions.
 - Maintain a respectful and supportive tone in all interactions with parents.
@@ -40,7 +39,7 @@ export async function POST(req: Request) {
     tools: {
 
       school_knowledge_search: tool({
-        description: 'This will perform a semantic search on the school knowledge based on the user query',
+        description: 'This will perform a search on the school knowledgebase based on the user query',
         inputSchema: z.object({
           query: z.string().describe('The query to search'),
         }),

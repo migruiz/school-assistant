@@ -57,14 +57,16 @@ const getPrompt = (query, emails) => {
         }
 
         emailsText += `
-EMAIL ${index + 1} (Date: ${email.receivedAt}, Similarity Score: ${email.similarityScore.toFixed(3)}):
+EMAIL ${index + 1} (Date: ${new Date(email.receivedAt).toISOString()}, Similarity Score: ${email.similarityScore.toFixed(3)}):
 ${body}
 
 ---
             `;
     });
 
-    const prompt = `Parent question: "${query}"
+    const prompt = `Today is ${(new Date()).toISOString()}
+
+Parent question: "${query}"
 
 School emails to rank:
 ${emailsText}

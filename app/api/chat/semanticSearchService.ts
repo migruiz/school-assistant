@@ -20,8 +20,8 @@ export async function queryVectorStore(openAIKey: string, userQuery: any, vector
         content: getFullContentAsText(item.content as [])
     }));
     const rankedResults = await rerank({openAIKey, query: userQuery, emails: results});
-    const result = formatResults(rankedResults);
-    return result;
+    const resultsToLLM = rankedResults.map((item: any) => item.content);
+    return resultsToLLM;
 
 }
 
