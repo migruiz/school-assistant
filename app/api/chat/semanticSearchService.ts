@@ -10,15 +10,14 @@ export async function queryVectorStore(openAIKey: string, userQuery: any, vector
         vectorStoreId,
         {
             query: userQuery,
-            max_num_results: 3
+            max_num_results: 5
         }
     );
     const filteredResults = results.data.map(item => ({
-        score: item.score,
         receivedAt: item.attributes?.receivedAt,
         content: item.content
     }));
-    const sortedResults = filteredResults.sort((a, b) => (b.score as number) - (a.score as number));
+    const sortedResults = filteredResults;
     const result = formatResults(sortedResults);
     return result;
 

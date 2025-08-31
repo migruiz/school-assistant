@@ -36,14 +36,14 @@ Properties to Extract:
 
 "summary": A concise, embedding-friendly summary of the email body (max ~200 characters). Focus only on the main content, ignoring greetings, signatures, and redundant text.
 "newSubject": A new subject line that accurately reflects the content of the email.
-"categories": relevant categories describing the email content (max 3). Prefer school-specific categories, such as:
+"topics": relevant topics describing the email content (max 3). Prefer school-specific topics, such as:
    - School Event
    - Closure
    - General Information
    - Staff/Teacher Update
    - Parent Carer Association
    - Bus Information
-"eventUpdates": Any event changes/new events with dates
+"eventUpdates": Any event changes/new events with date and time
 "likelyQuestions": Questions parents might ask about this content (max 4)
 
 
