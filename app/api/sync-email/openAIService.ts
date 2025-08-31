@@ -11,6 +11,13 @@ export async function importEmails(openAIKey: string, vectorStoreId: string, vec
     if (!vectorStoreId) {
         vectorStore = await client.vectorStores.create({   // Create vector store
             name: vectorStoreName,
+            chunking_strategy:{
+                type:'static',
+                static:{
+                    chunk_overlap_tokens:0,
+                    max_chunk_size_tokens:4096
+                }
+            }
         });
         createdVectorStoreId = vectorStore.id;
     }
