@@ -26,10 +26,12 @@ export async function importEmails(openAIKey: string, vectorStoreId: string, vec
         });
         const dataToUpload = {
             date: email.receivedAt,
-            subject: summaryData.subject,
-            summary: summaryData.summary,
-            categories: summaryData.categories.join(","),
+            subject: summaryData.newSubject,
+            //summary: summaryData.summary,
+            eventUpdates: summaryData.eventUpdates,
+            categories: summaryData.categories.join(", "),
             content: email.body,
+            likelyQuestions:summaryData.likelyQuestions
             
         };        
         const documentForSemanticSearch = formatDocumentForSemanticSearch(dataToUpload);

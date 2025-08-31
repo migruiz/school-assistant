@@ -28,27 +28,25 @@ function getPrompt(content: any) :string{
 
     return `
 You are an assistant that processes school announcement emails for semantic search.
-All emails come from the school principal and relate to school events, staff, classes, or general school information.
+All emails come from the school and relate to school events, staff, classes, or general school information.
 
-Given an email object in JSON format, perform the following tasks:
+Given an email object in JSON format, Extract and Respond with only valid JSON. Do not include any text, explanations, or code fences.
 
-1. Generate a concise, embedding-friendly summary of the email body (max ~200 characters). Focus only on the main content, ignoring greetings, signatures, and redundant text.
-2. Create a new subject line that accurately reflects the content of the email.
-3. Extract 1–5 relevant categories describing the email content. Prefer school-specific categories, such as:
-   - Class Updates
+Properties to Extract:
+
+"summary": A concise, embedding-friendly summary of the email body (max ~200 characters). Focus only on the main content, ignoring greetings, signatures, and redundant text.
+"newSubject": A new subject line that accurately reflects the content of the email.
+"categories": relevant categories describing the email content (max 5). Prefer school-specific categories, such as:
    - School Event
-   - Holiday / Closure
-   - Announcement / General Information
-   - Staff Update
+   - Closure
+   - General Information
+   - Staff/Teacher Update
    - Parent Carer Association
    - Bus Information
+"eventUpdates": Any event changes/new events with dates
+"likelyQuestions": Questions parents might ask about this content (max 8)
 
-Return your result as a JSON object with this structure:
-{
-  "subject": <generated subject>,
-  "summary": <embedding-friendly summary>,
-  "categories": [<category1>, <category2>, ...]
-}
+
 
 Here is the email object to process:
 ${JSON.stringify(content)}
