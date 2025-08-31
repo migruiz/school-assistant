@@ -11,6 +11,13 @@ export async function importEmails(openAIKey: string, vectorStoreId: string, vec
     if (!vectorStoreId) {
         vectorStore = await client.vectorStores.create({   // Create vector store
             name: vectorStoreName,
+            chunking_strategy:{
+                type:'static',
+                static:{
+                    chunk_overlap_tokens:0,
+                    max_chunk_size_tokens:4096
+                }
+            }
         });
         createdVectorStoreId = vectorStore.id;
     }
@@ -26,10 +33,11 @@ export async function importEmails(openAIKey: string, vectorStoreId: string, vec
         });
         const dataToUpload = {
             date: email.receivedAt,
-            subject: summaryData.subject,
-            summary: summaryData.summary,
-            categories: summaryData.categories.join(","),
-            content: email.body,
+            subject: summaryData.newSubject,
+            eventUpdates: summaryData.eventUpdates,
+            topics: summaryData.topics.join(", "),
+            body: email.body,
+            likelyQuestions:summaryData.likelyQuestions
             
         };        
         const documentForSemanticSearch = formatDocumentForSemanticSearch(dataToUpload);
@@ -59,11 +67,11 @@ function formatDocumentForSemanticSearch(dataToUpload:any) {
 
   let result = `**Subject**: ${dataToUpload.subject}\n`;
     result += `**Date**: ${dataToUpload.date}\n`;    
-    result += `**Categories**: ${dataToUpload.categories}\n`;
-    result += `**Summary**: \n`;
-    result += `${dataToUpload.summary}\n\n`;
-    result += `**Content**: \n`;
-    result += `${dataToUpload.content}\n`;
+    result += `**Topics**: ${dataToUpload.topics}\n`;
+    result += `**Body**: \n`;
+    result += `${dataToUpload.body}\n`;
+    result += `**Likely Questions**: \n`;
+    result += `${dataToUpload.likelyQuestions.join("\n")}\n`;
 
   return result.trim();
 }

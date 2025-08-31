@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import {rerank} from './reRanker'
 export async function queryVectorStore(openAIKey: string, userQuery: any, vectorStoreId: string) {
     // Initialize OpenAI client with your API key
     const client = new OpenAI({
@@ -6,21 +7,22 @@ export async function queryVectorStore(openAIKey: string, userQuery: any, vector
     });
 
 
-    const results = await client.vectorStores.search(
+    const vectorSeaechResults = await client.vectorStores.search(
         vectorStoreId,
         {
             query: userQuery,
-            max_num_results: 3
+            max_num_results: 5
         }
     );
-    const filteredResults = results.data.map(item => ({
-        score: item.score,
+    const results = vectorSeaechResults.data.map(item => ({
+        similarityScore: item.score,
         receivedAt: item.attributes?.receivedAt,
-        content: item.content
+        content: getFullContentAsText(item.content as [])
     }));
-    const sortedResults = filteredResults.sort((a, b) => (b.score as number) - (a.score as number));
-    const result = formatResults(sortedResults);
-    return result;
+    const rankedResults = await rerank({openAIKey, query: userQuery, emails: results});
+    const resultsToLLM = rankedResults.map((item: any) => item.content);
+    const formattedResult = formatResults(resultsToLLM)
+    return formattedResult;
 
 }
 
@@ -29,19 +31,23 @@ function formatResults(data:any) {
   
   let result ="";
 
-  data.forEach((dataItem: any, index:number) => {
-    const {content, score} =  dataItem;
+  data.forEach((content: any, index:number) => {
     result += `${index + 1}. Search Result:\n`;
-    result += `Score: ${score}\n`;
-
-    content.forEach((contentItem: any) => {
-      if (contentItem.type === "text") {
-        result += `${contentItem.text}"\n\n`;
-      }
-    });
-
-    result += "\n\n\n\n";
+    result += `${content}"\n\n\n`;
   });
 
   return result.trim();
+}
+
+
+
+function getFullContentAsText(content:[]) {
+
+  let result ="";
+    content.forEach((contentItem: any) => {
+      if (contentItem.type === "text") {
+        result += `${contentItem.text}"\n`;
+      }
+    });
+    return result;
 }
