@@ -8,6 +8,7 @@ export const rerank = async ({openAIKey, query, emails, topK = 3}) => {
         apiKey: openAIKey
     });
     const prompt = getPrompt(query, emails);
+    console.log("Reranking prompt:", prompt);
 
     try {
 
@@ -56,7 +57,7 @@ const getPrompt = (query, emails) => {
         }
 
         emailsText += `
-EMAIL ${index + 1} (Date: ${email.receivedAt}):
+EMAIL ${index + 1} (Date: ${email.receivedAt}, Similarity Score: ${email.similarityScore.toFixed(3)}):
 ${body}
 
 ---
@@ -68,14 +69,15 @@ ${body}
 School emails to rank:
 ${emailsText}
 
-IMPORTANT: Some emails may contain metadata sections like **Topics**, **Likely Questions**. IGNORE these sections completely when ranking. Only consider the actual email content (**Date**, **Body**) sent by the school.
-
-Rank these emails from most relevant (1) to least relevant (${emails.length}) for answering the parent's question.
+- IMPORTANT: Some emails may contain metadata sections like **Topics**, **Likely Questions**. IGNORE these sections completely when ranking. Only consider the actual email content (**Date**, **Body**) sent by the school.
+- The similarity scores show how well each email matches the query semantically - use this as additional context.
+- Rank these emails from most relevant (1) to least relevant (${emails.length}) for answering the parent's question.
 
 Consider:
 - Which email best answers the specific question?
 - Recent emails are generally more important for events/updates
 - Specific information is better than general information
+- Higher similarity scores suggest better semantic match
 - IGNORE any **Topics**, **Likely Questions** sections
 
 Respond with only the ranking as a JSON array: [email_number, email_number, ...]

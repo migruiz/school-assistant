@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import {rerank} from './reRanker'
 export async function queryVectorStore(openAIKey: string, userQuery: any, vectorStoreId: string) {
     // Initialize OpenAI client with your API key
     const client = new OpenAI({
@@ -6,19 +7,20 @@ export async function queryVectorStore(openAIKey: string, userQuery: any, vector
     });
 
 
-    const results = await client.vectorStores.search(
+    const vectorSeaechResults = await client.vectorStores.search(
         vectorStoreId,
         {
             query: userQuery,
             max_num_results: 5
         }
     );
-    const filteredResults = results.data.map(item => ({
+    const results = vectorSeaechResults.data.map(item => ({
+        similarityScore: item.score,
         receivedAt: item.attributes?.receivedAt,
-        content: item.content
+        content: getFullContentAsText(item.content as [])
     }));
-    const sortedResults = filteredResults;
-    const result = formatResults(sortedResults);
+    const rankedResults = await rerank({openAIKey, query: userQuery, emails: results});
+    const result = formatResults(rankedResults);
     return result;
 
 }
@@ -29,9 +31,8 @@ function formatResults(data:any) {
   let result ="";
 
   data.forEach((dataItem: any, index:number) => {
-    const {content, score} =  dataItem;
+    const {content} =  dataItem;
     result += `${index + 1}. Search Result:\n`;
-    result += `Score: ${score}\n`;
 
     content.forEach((contentItem: any) => {
       if (contentItem.type === "text") {
@@ -43,4 +44,17 @@ function formatResults(data:any) {
   });
 
   return result.trim();
+}
+
+
+
+function getFullContentAsText(content:[]) {
+
+  let result ="";
+    content.forEach((contentItem: any) => {
+      if (contentItem.type === "text") {
+        result += `${contentItem.text}"\n`;
+      }
+    });
+    return result;
 }

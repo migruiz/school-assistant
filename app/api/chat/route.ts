@@ -14,7 +14,7 @@ import {queryGeneralInfoVectorStore} from './generalInfoService'
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
-  const vectorStoreId = "vs_68b4b2ed0614819189827415e44faa5a";
+  const vectorStoreId = "vs_68b4bb1b5ee08191ac76013fde8753f2";
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
