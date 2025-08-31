@@ -52,7 +52,6 @@ export async function POST(req: Request) {
   });
   async function performSemanticSearch({ query }: { query: string }) {
     const results = await queryVectorStore(openAIKey, query, vectorStoreId);
-    console.log(JSON.stringify(results, null, 2));
     return results;
   }
 

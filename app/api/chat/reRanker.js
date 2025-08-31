@@ -8,7 +8,6 @@ export const rerank = async ({openAIKey, query, emails, topK = 3}) => {
         apiKey: openAIKey
     });
     const prompt = getPrompt(query, emails);
-    console.log("Reranking prompt:", prompt);
 
     try {
 
