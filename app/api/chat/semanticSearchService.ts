@@ -21,7 +21,8 @@ export async function queryVectorStore(openAIKey: string, userQuery: any, vector
     }));
     const rankedResults = await rerank({openAIKey, query: userQuery, emails: results});
     const resultsToLLM = rankedResults.map((item: any) => item.content);
-    return resultsToLLM;
+    const formattedResult = formatResults(resultsToLLM)
+    return formattedResult;
 
 }
 
@@ -30,17 +31,9 @@ function formatResults(data:any) {
   
   let result ="";
 
-  data.forEach((dataItem: any, index:number) => {
-    const {content} =  dataItem;
+  data.forEach((content: any, index:number) => {
     result += `${index + 1}. Search Result:\n`;
-
-    content.forEach((contentItem: any) => {
-      if (contentItem.type === "text") {
-        result += `${contentItem.text}"\n\n`;
-      }
-    });
-
-    result += "\n\n\n\n";
+    result += `${content}"\n\n\n`;
   });
 
   return result.trim();
