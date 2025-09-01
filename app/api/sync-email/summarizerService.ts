@@ -43,7 +43,6 @@ Properties to Extract:
    - Staff/Teacher Update
    - Parent Carer Association
    - Bus Information
-"eventUpdates": Any event changes/new events with date and time
 "likelyQuestions": Questions parents might type into a school chatbot to find this content. (max 4)
 
 
