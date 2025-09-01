@@ -8,8 +8,8 @@ import {
   stepCountIs
 } from "ai";
 import { getFirestoreDatabase, getSchoolInfo } from './openAIDataService'
-import getSchoolCalendarTool from './tools/schoolCalendar/tool'
-import getNewsTool from './tools/news/tool'
+import {getSchoolCalendarTool} from './tools/schoolCalendar/tool'
+import {getNewsTool} from './tools/news/tool'
 
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
@@ -26,13 +26,12 @@ export async function POST(req: Request) {
     },
     system: `
 - Assist parents of Rathcoole Educate Together National School by providing accurate answers to school queries.
-- Use the school_knowledge_search tool when answering the queries, unless the answer is already known based on your context.
-- The results from the school_knowledge_search tool may contain metadata sections like **Topics**, **Likely Questions**. IGNORE these sections completely. Only consider the actual content (**Date**, **Body**).
-- Use ONLY the 'school_calendar' tool when answering queries related to school opening/closing dates and times. 
+- Use the tools provided to find accurate information to answer the query.
+- Make sure to ALWAYS  search in School News as important updates and information are often posted there, even if you consider that is not needed.
 - Ensure responses are clear, concise, and easy for parents to understand.
 - Do not provide personal opinions.
 - Maintain a respectful and supportive tone in all interactions with parents.
-- If after searching in your school_knowledge_search tool, the query cannot be answered due to lack of information, advise the parent to contact the school directly.
+- If the query cannot be answered due to lack of information, advise the parent to contact the school directly.
 - Never share confidential or sensitive information about students, or families.
 - Respond only in English.
 - Today is ${new Date().toISOString().split('T')[0]}
