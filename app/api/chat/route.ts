@@ -10,6 +10,7 @@ import {
 import { queryVectorStore } from './semanticSearchService'
 import { getFirestoreDatabase, getSchoolInfo } from './openAIDataService'
 import {queryGeneralInfoVectorStore} from './generalInfoService'
+import {searchCalendar} from './schoolCalendar'
 
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
@@ -26,8 +27,9 @@ export async function POST(req: Request) {
     },
     system: `
 - Assist parents of Rathcoole Educate Together National School by providing accurate answers to school queries.
-- Always use the school_knowledge_search tool when answering the queries, unless the answer is already known based on your context.
+- Use the school_knowledge_search tool when answering the queries, unless the answer is already known based on your context.
 - The results from the school_knowledge_search tool may contain metadata sections like **Topics**, **Likely Questions**. IGNORE these sections completely. Only consider the actual content (**Date**, **Body**).
+- Use ONLY the 'school_calendar' tool when answering queries related to school opening/closing dates and times. 
 - Ensure responses are clear, concise, and easy for parents to understand.
 - Do not provide personal opinions.
 - Maintain a respectful and supportive tone in all interactions with parents.
@@ -47,6 +49,16 @@ export async function POST(req: Request) {
           query: z.string().describe('The query to search'),
         }),
         execute: async ({ query }) => await performSemanticSearch({ query }),
+      }),
+        'school_calendar': tool({
+        description: `This tool answers all related to the school opening/closing dates and times and if there are any event that changes the normal schedule.
+        The tool expects a serch date range as parameter. You need to convert any relative dates (today, tomorrow, next week) in the user query to absolute dates.
+        The tool uses the search date range to search the school calendar`,
+        inputSchema: z.object({
+          fromDate: z.string().describe('The Start Date in this format YYYY-MM-DD'),
+          toDate: z.string().describe('The End Date in this format YYYY-MM-DD'),
+        }),
+        execute: async ({ fromDate, toDate }) => await searchCalendar({openAIKey, schoolCalendar, fromDate, toDate }),
       }),
     },
   });

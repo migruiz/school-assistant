@@ -163,7 +163,7 @@ const ThreadWelcome: FC = () => {
                     LOGIN
                   </Button>
                 </Link>
-                  <Button className="flex bg-blue-500 text-white  gap-1 rounded-lg px-2.5 py-2 ml-4" 
+                 {/* <Button className="flex bg-blue-500 text-white  gap-1 rounded-lg px-2.5 py-2 ml-4" 
                   onClick={async (e)=>{
                     e.preventDefault();
                     await demoLogin();
@@ -171,7 +171,7 @@ const ThreadWelcome: FC = () => {
                   >
                     <LockOpenIcon />
                     DEMO
-                  </Button>
+                  </Button>*/}
               </motion.div>
             }
           </div>
