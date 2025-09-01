@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     tools: {
       schoolNews: tool(getNewsTool({ openAIKey, vectorStoreId })),
       schoolCalendar: tool(getSchoolCalendarTool({openAIKey, schoolCalendar})),
-      outOfSchool: tool(getOutOfSchoolTool({childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId}))
+      outOfSchool: tool(getOutOfSchoolTool({openAIKey, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId}))
     },
   });
 
