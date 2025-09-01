@@ -7,10 +7,9 @@ import {
   tool,
   stepCountIs
 } from "ai";
-import { queryVectorStore } from './semanticSearchService'
 import { getFirestoreDatabase, getSchoolInfo } from './openAIDataService'
-import {queryGeneralInfoVectorStore} from './generalInfoService'
 import getSchoolCalendarTool from './tools/schoolCalendar/tool'
+import getNewsTool from './tools/news/tool'
 
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
@@ -42,21 +41,10 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
-
-      school_knowledge_search: tool({
-        description: 'This will perform a search on the school knowledgebase based on the user query',
-        inputSchema: z.object({
-          query: z.string().describe('The query to search'),
-        }),
-        execute: async ({ query }) => await performSemanticSearch({ query }),
-      }),
-      'school_calendar': tool(getSchoolCalendarTool({openAIKey, schoolCalendar})),
+      schoolNews: tool(getNewsTool({ openAIKey, vectorStoreId })),
+      schoolCalendar: tool(getSchoolCalendarTool({openAIKey, schoolCalendar})),
     },
   });
-  async function performSemanticSearch({ query }: { query: string }) {
-    const results = await queryVectorStore(openAIKey, query, vectorStoreId);
-    return results;
-  }
 
   return result.toUIMessageStreamResponse();
 }
