@@ -52,7 +52,8 @@ export async function POST(req: Request) {
       }),
         'school_calendar': tool({
         description: `This tool answers all related to the school opening/closing dates and times and if there are any event that changes the normal schedule.
-        The tool expects a serch date range as parameter. You need to convert any relative dates (today, tomorrow, next week) in the user query to absolute dates.
+        It can also provide information about upcoming school holidays (Mid-Term Break, Winter Break, Half Days, Early Finish, etc.) that may change the normal schedule.
+        The tool expects a search date range as parameter. You need to convert any relative dates (today, tomorrow, next week) in the user query to absolute dates.
         The tool uses the search date range to search the school calendar`,
         inputSchema: z.object({
           fromDate: z.string().describe('The Start Date in this format YYYY-MM-DD'),
