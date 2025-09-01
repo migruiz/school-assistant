@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import {rerank} from './reRanker'
+import {rerank} from '../../reRanker'
 export async function queryVectorStore(openAIKey: string, userQuery: any, vectorStoreId: string) {
     // Initialize OpenAI client with your API key
     const client = new OpenAI({

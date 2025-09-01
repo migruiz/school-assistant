@@ -5,15 +5,15 @@ import { getFirestore } from 'firebase-admin/firestore';
 export async function getSchoolInfo(
     db: FirebaseFirestore.Firestore,
     schoolId: string
-): Promise<{ openAIKey: string; schoolCalendar: string; generalInfoVectorStoreId: string }> {
+): Promise<{ openAIKey: string; schoolCalendar: string; generalInfoVectorStoreId: string; childCareServicesDataVectorStoreId: string; afterSchoolDataVectorStoreId: string }> {
     const schoolDataRef = db.collection('schools').doc(schoolId);
     const docSnap = await schoolDataRef.get();
     const data = docSnap.data();
     if (!data) {
         throw new Error(`School with ID ${schoolId} not found.`);
     }
-    const { openAIKey, schoolCalendar, generalInfoVectorStoreId } = data;
-    return { openAIKey, schoolCalendar, generalInfoVectorStoreId };
+    const { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId } = data;
+    return { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId };
 }
 
 
