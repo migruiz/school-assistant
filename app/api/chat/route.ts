@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
   const vectorStoreId = "vs_68b4bb1b5ee08191ac76013fde8753f2";
-  const { openAIKey, schoolCalendar, generalInfoVectorStoreId } = await getSchoolInfo(db, schoolId);
+  const { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
     model: openai("gpt-4o-mini"),
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     tools: {
       schoolNews: tool(getNewsTool({ openAIKey, vectorStoreId })),
       schoolCalendar: tool(getSchoolCalendarTool({openAIKey, schoolCalendar})),
-      outOfSchool: tool(getOutOfSchoolTool())
+      outOfSchool: tool(getOutOfSchoolTool({childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId}))
     },
   });
 

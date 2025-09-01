@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-export const getOutOfSchoolTool = () => ({
+export const getOutOfSchoolTool = ({childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId}) => ({
     description: `This tool answers queries related to out of school activities, like childcare services (breakfast club) and after school programs like STEAM, chess, Dancing Clubs`,
     inputSchema: z.object({
         types: z.array(z.enum(["afterSchool", "childCare"])).describe('The type of out of school activity to search for. afterSchool: After School Activities like STEAM, chess, Dancing Clubs. childCare: Childcare services like breakfast club'),        
