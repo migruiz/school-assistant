@@ -44,10 +44,9 @@ async function embed(text) {
     });
     return response.data[0].embedding
 }
-function getNewId() {
+function getNewId({ filename, chunkId }) {
     const timestamp = new Date().getTime();
-    const randomPart = Math.floor(Math.random() * 10000);
-    return `${timestamp}-${randomPart}`;
+    return `${filename}-${chunkId}-${timestamp}`;
 }
 
 (async () => {
@@ -60,13 +59,15 @@ function getNewId() {
     const filename = "example.pdf";
 
     const chunks = await loadAndChunk(filename);
-    for (const { pageContent } of chunks) {
-        const embedding = await embed(pageContent);
-        const id = getNewId();
+    for (const chunk of chunks) {
+        const chunkId = chunks.indexOf(chunk) + 1;
+        const text = chunk.pageContent;
+        const embedding = await embed(text);
+        const id = getNewId({ filename, chunkId });
         await collection.add({
             ids: [id],
             embeddings: [embedding],
-            documents: [pageContent],
+            documents: [text],
             metadatas: [{ filename }]
         })
     }
