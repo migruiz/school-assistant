@@ -40,3 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 googletoken/node_modules/
+uploader/node_modules/
