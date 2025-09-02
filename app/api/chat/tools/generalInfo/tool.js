@@ -19,6 +19,7 @@ export const getGeneralInfoTool = ({ openAIKey, generalInfoVectorStoreId }) => (
                 {
                     type: "file_search",
                     vector_store_ids: [generalInfoVectorStoreId],
+                    max_num_results: 5
                 },
             ],
         });

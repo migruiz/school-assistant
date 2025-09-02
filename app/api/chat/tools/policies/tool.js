@@ -30,6 +30,7 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
                 {
                     type: "file_search",
                     vector_store_ids: [policiesVectorStoreId],
+                    max_num_results: 5
                 },
             ],
         });
