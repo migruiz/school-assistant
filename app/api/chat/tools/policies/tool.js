@@ -1,0 +1,41 @@
+
+import { z } from 'zod';
+import OpenAI from "openai";
+export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
+    description: `This tool answers queries related to school policies:
+-   Science Policy: like biological and physical world, scientific ideas 
+-   Use of Photographs and Videos in school publicity materials, on the school website, social media pages and in the press
+-   Geography Policy: natural and human environments in the locality, region, Ireland, Europe and the world 
+-   Code of Behaviour Policy: Pupils behaviour incidents, This policy aims to support the pupil exhibiting Behaviours of Concern, other pupils, staff and the relevant parents.
+-   Social, Personal and Health Education (SPHE) Policy:  Through SPHE, we seek to develop positive self-esteem, social and communication skills, appropriate expression of feelings as well as safety and protection skills in each child in our care.
+-   Intimate Care Policy:  involves attending to a student when they are undressed or partially dressed; helping a student with washing (including intimate parts); helping atudent to use the toilet;
+-   History Policy:  events in their own immediate past, the past of their families and local communities, and the history of people in Ireland and other parts of the world.
+-   Data Protection Policy: This Data Protection Statement describes how we at Rathcoole Educate Together NS collect and process personal data, in accordance with the GDPR and the school's legal obligations generally in relation to the provision of education
+-   Critical Incident Policy:  A critical incident is any incident or sequence of events which overwhelms the normal coping mechanisms of the school.
+-   Communications Policy: procedures for the sharing of information in relation to pupil progress, needs and attainment.  Parent/caregiver-Teacher/Home School Communication
+-   Anti-Bullying Policy
+-   Code of Positive Behaviour: School Standards, rules, sanctions, suspension, minor behaviour incidents, serious behaviour incidents.
+
+    `,
+    inputSchema: z.object({
+        userQuery: z.string().describe('The User query'),
+    }),
+    execute: async ({ userQuery, }) => {
+        const client = new OpenAI({ apiKey: openAIKey });
+
+        const response = await client.responses.create({
+            model: "gpt-4o-mini",
+            input: userQuery,
+            tools: [
+                {
+                    type: "file_search",
+                    vector_store_ids: [policiesVectorStoreId],
+                },
+            ],
+        });
+
+        const result = response.output_text;
+
+        return result;
+    }
+})
