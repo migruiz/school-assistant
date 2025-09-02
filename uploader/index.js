@@ -7,7 +7,8 @@ import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import OpenAI from "openai";
-
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -44,32 +45,50 @@ async function embed(text) {
     });
     return response.data[0].embedding
 }
-function getNewId({ filename, chunkId }) {
+function getNewId({ fileName, chunkId }) {
     const timestamp = new Date().getTime();
-    return `${filename}-${chunkId}-${timestamp}`;
+    return `${fileName}-${chunkId}-${timestamp}`;
 }
-
+const folderToEmbed = "C:\\repos\\retns\\static";
+const client = new CloudClient();
 (async () => {
+
     const name = "generalInfo";
-    const client = new CloudClient();
-    const collection = await client.getOrCreateCollection({
-        name
-    });
 
-    const filename = "example.pdf";
 
-    const chunks = await loadAndChunk(filename);
-    for (const chunk of chunks) {
-        const chunkId = chunks.indexOf(chunk) + 1;
-        const text = chunk.pageContent;
-        const embedding = await embed(text);
-        const id = getNewId({ filename, chunkId });
-        await collection.add({
-            ids: [id],
-            embeddings: [embedding],
-            documents: [text],
-            metadatas: [{ filename }]
-        })
+
+
+
+    const folders = fs.readdirSync(folderToEmbed, { withFileTypes: true }).filter(f => f.isDirectory())
+    for (const folder of folders) {
+        const folderPath = path.join(folderToEmbed, folder.name);
+        const files = fs.readdirSync(folderPath, { withFileTypes: true }).filter(f => !f.isDirectory())
+
+        const collection = await client.getOrCreateCollection({
+            name: folder.name
+        });
+        for (const file of files) {
+            const fileName = file.name;
+            const filePath = path.join(folderPath, fileName);
+
+            const chunks = await loadAndChunk(filePath);
+            for (const chunk of chunks) {
+                const chunkId = chunks.indexOf(chunk) + 1;
+                const text = chunk.pageContent;
+                const embedding = await embed(text);
+                const id = getNewId({ fileName, chunkId });
+                await collection.add({
+                    ids: [id],
+                    embeddings: [embedding],
+                    documents: [text],
+                    metadatas: [{ fileName }]
+                })
+            }
+        }
     }
+
+
+
+
 
 })();
