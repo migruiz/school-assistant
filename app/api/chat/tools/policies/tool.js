@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
 import OpenAI from "openai";
+import { CloudClient } from "chromadb";
 export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
     description: `This tool answers queries related to school policies:
 -   Science Policy: like biological and physical world, scientific ideas 
@@ -20,23 +21,42 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
     inputSchema: z.object({
         userQuery: z.string().describe('The User query'),
     }),
-    execute: async ({ userQuery, }) => {
-        const client = new OpenAI({ apiKey: openAIKey });
+    execute: async ({ userQuery }) => {
+        const chromaClient = new CloudClient();        
+        const openai = new OpenAI({ apiKey: openAIKey });
 
-        const response = await client.responses.create({
+        const [collection, queryEmbedding] = await Promise.all([
+            chromaClient.getCollection({ name: "policies" }),
+            openai.embeddings.create({
+                model: "text-embedding-3-small",
+                input: userQuery
+            })
+        ]);
+
+        const results = await collection.query({
+            queryEmbeddings: [queryEmbedding.data[0].embedding],
+            nResults: 5,
+        });
+        // 3. Build context from chunks
+        const chunks = results.documents[0]; // documents is an array-of-arrays
+        const context = chunks.join("\n---\n");
+
+        // 4. Ask OpenAI to answer using only these chunks
+        const response = await openai.responses.create({
             model: "gpt-4o-mini",
-            input: userQuery,
-            tools: [
+            input: [
                 {
-                    type: "file_search",
-                    vector_store_ids: [policiesVectorStoreId],
-                    max_num_results: 5
+                    role: "system",
+                    content: "You are a helpful assistant. Answer only using the provided context. If you don't know, say so."
                 },
-            ],
+                {
+                    role: "user",
+                    content: `Context:\n${context}\n\nQuestion: ${userQuery}`
+                }
+            ]
         });
 
-        const result = response.output_text;
 
-        return result;
+        return response.output_text;
     }
 })
