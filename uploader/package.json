@@ -9,6 +9,7 @@
     "chromadb": "^3.0.14",
     "langchain": "^0.3.31",
     "mammoth": "^1.10.0",
+    "openai": "^5.17.0",
     "pdf-parse": "^1.1.1"
   }
 }

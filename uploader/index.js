@@ -6,11 +6,12 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-
+import OpenAI from "openai";
 
 
 dotenv.config();
 
+const openai = new OpenAI();
 async function loadAndChunk(filePath) {
     let loader;
 
@@ -38,27 +39,29 @@ async function loadAndChunk(filePath) {
 }
 
 (async () => {
-
-    const chunks = await loadAndChunk("example.pdf");
-    chunks.forEach((c, i) => {
-        console.log(`Chunk ${i}:`, c.pageContent.slice(0, 100));
-    });
-    return;
-
-
-
     const name = "generalInfo";
     const client = new CloudClient();
     const collection = await client.getOrCreateCollection({
-        name: "generalInfo",
-        embeddingFunction: new OpenAIEmbeddingFunction({
-            apiKey: process.env.OPENAI_API_KEY,
-            modelName: "text-embedding-3-small"
-        })
+        name
     })
-    await collection.add({
-        ids: ["id1", "id2", "id3"],
-        documents: ["lorem ipsum...", "doc2", "doc3"],
-        metadatas: [{ "chapter": 3, "verse": 16 }, { "chapter": 3, "verse": 5 }, { "chapter": 29, "verse": 11 }],
-    });
+
+    const chunks = await loadAndChunk("example.pdf");
+    for (const chunk of chunks) {
+        console.log(`Chunk ${chunk.id}:`, chunk.pageContent.slice(0, 100));
+        const response = await openai.embeddings.create({
+            model: "text-embedding-3-small",
+            input: chunk.pageContent,
+        });
+        const timestamp = new Date().getTime(); // current time in milliseconds
+        const randomPart = Math.floor(Math.random() * 10000); // random 4-digit number
+
+
+        await collection.add({
+            ids: [`${timestamp}-${randomPart}`],
+            embeddings: [response.data[0].embedding],
+            documents: [chunk.pageContent],
+             metadatas: [{"chapter": 3, "verse": 16}]
+        })
+    }
+
 })();
