@@ -36,8 +36,9 @@ class DocumentProcessor:
         
         # Initialize text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=300
+            separators=["\n"],
+            chunk_size=800,
+            chunk_overlap=400
         )
 
     def load_and_chunk(self, file_path: str) -> List[Document]:
