@@ -40,8 +40,8 @@ class DocumentProcessor:
         # Initialize text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n"],
-            chunk_size=800,
-            chunk_overlap=400
+            chunk_size=1200,
+            chunk_overlap=500
         )
 
     def load_and_chunk(self, file_path: str) -> List[Document]:
@@ -63,6 +63,7 @@ class DocumentProcessor:
         
         # Chunk documents
         chunked_docs = self.text_splitter.split_documents(docs)
+        return chunked_docs
         
         for i in range(0, len(chunked_docs), 5):
             batch = chunked_docs[i:i+5]
@@ -143,7 +144,7 @@ class DocumentProcessor:
             
             # Create or get collection
             try:
-                collection = self.client.get_or_create_collection(name=folder.name)
+                collection = self.client.get_or_create_collection(name=folder.name, metadata={"hnsw:space": "cosine"} )
                 print(f"Created/accessed collection: {folder.name}")
             except Exception as e:
                 print(f"Error creating collection {folder.name}: {e}")

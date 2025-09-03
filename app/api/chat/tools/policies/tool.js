@@ -26,7 +26,7 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
         const openai = new OpenAI({ apiKey: openAIKey });
 
         const [collection, queryEmbedding] = await Promise.all([
-            chromaClient.getCollection({ name: "policies" }),
+            chromaClient.getCollection({ name: "policies_t" }),
             openai.embeddings.create({
                 model: "text-embedding-3-small",
                 input: userQuery
@@ -35,7 +35,8 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
 
         const results = await collection.query({
             queryEmbeddings: [queryEmbedding.data[0].embedding],
-            nResults: 5,
+            include:["distances","documents"],
+            nResults: 25,
         });
         // 3. Build context from chunks
         const chunks = results.documents[0]; // documents is an array-of-arrays
