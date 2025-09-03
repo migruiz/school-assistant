@@ -1,13 +1,15 @@
+import json
 import os
 import time
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
+from openai import OpenAI
 
 import chromadb
 from chromadb.api import ClientAPI
 from chromadb.api.models.Collection import Collection
-
+from collections import defaultdict
 
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -33,6 +35,7 @@ class DocumentProcessor:
             model="text-embedding-3-small",
             openai_api_key=os.getenv("OPENAI_API_KEY")
         )
+        self.openAIClient =  OpenAI()
         
         # Initialize text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -60,8 +63,71 @@ class DocumentProcessor:
         
         # Chunk documents
         chunked_docs = self.text_splitter.split_documents(docs)
+        
+        
+        # Group by fileName
+        grouped = defaultdict(list)
+        for chunk in chunked_docs:
+            grouped[chunk.metadata["source"]].append(chunk.page_content)
+
+        # Convert back to a normal dict if needed
+        grouped_chunks = dict(grouped)
+        
+        for file_name, content_list in grouped_chunks.items():
+            print(f"File: {file_name}")
+            indexed_chunks = [
+                {"chunk_index": i, "content": text}
+                for i, text in enumerate(content_list)
+            ]
+            questions = self.generate_questions_for_chunks(indexed_chunks)
+            sd = questions
+                
+            
         return chunked_docs
 
+
+    def generate_questions_for_chunks(self, chunks):
+        """
+        Takes a list of text chunks and returns a list of question arrays.
+        Each element in the output corresponds to the same index in 'chunks'
+        and contains 3 likely questions a user may ask about that chunk.
+        """
+        
+
+        prompt = f"""
+        You are given the following JSON array of text chunks:
+
+        {json.dumps(chunks, indent=2)}
+
+        For each chunk, generate NO MORE THAN 3 concise user questions someone might ask.
+        Return only valid JSON with no markdown, no ```json fences, no commentary.
+
+        [
+        {{"chunk_index": 0, "questions": ["Q1", "Q2", "Q3"]}},
+        ...
+        ]
+        Do not add any commentary or Markdown.
+        """
+
+        full_input = prompt
+        response = self.openAIClient.responses.create(
+            model="gpt-4o-mini",
+            input=full_input,
+            temperature=0.3,
+            max_output_tokens=1500
+        )
+
+        # Extract JSON text from response
+        output_text = response.output_text.strip()
+
+        try:
+            questions = json.loads(output_text)
+        except json.JSONDecodeError:
+            raise ValueError("Model response was not valid JSON:\n" + output_text)
+        
+        return questions
+    
+    
     def get_new_id(self, file_name: str, chunk_id: int) -> str:
         """Generate a unique ID for each chunk"""
         timestamp = int(time.time() * 1000)  # milliseconds
@@ -94,6 +160,7 @@ class DocumentProcessor:
                 try:
                     # Load and chunk the file
                     chunks = self.load_and_chunk(str(file))
+                    continue
                     
                     # Process each chunk
                     for chunk_index, chunk in enumerate(chunks):
