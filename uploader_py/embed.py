@@ -68,29 +68,27 @@ class DocumentProcessor:
         # Group by fileName
         grouped = defaultdict(list)
         for chunk in chunked_docs:
-            grouped[chunk.metadata["source"]].append(chunk.page_content)
+            grouped[chunk.metadata["source"]].append(chunk)
 
         # Convert back to a normal dict if needed
         grouped_chunks = dict(grouped)
         
-        for file_name, content_list in grouped_chunks.items():
+        for file_name, chunk_list in grouped_chunks.items():
             print(f"File: {file_name}")
             indexed_chunks = [
-                {"chunk_index": i, "content": text}
-                for i, text in enumerate(content_list)
+                {"chunk_index": i, "content": chunk.page_content}
+                for i, chunk in enumerate(chunk_list)
             ]
-            questions = self.generate_questions_for_chunks(indexed_chunks)
-            sd = questions
-                
-            
-        return chunked_docs
+            gen_questions = self.generate_questions_for_chunks(indexed_chunks)
+            for gen_question in gen_questions:
+                print(f"File: {gen_question['chunk_index']} Questions: {gen_question['questions']}")
 
 
     def generate_questions_for_chunks(self, chunks):
         """
         Takes a list of text chunks and returns a list of question arrays.
         Each element in the output corresponds to the same index in 'chunks'
-        and contains 3 likely questions a user may ask about that chunk.
+        and contains 3 likely questions parents might type into a school chatbot to find this content.
         """
         
 
@@ -99,8 +97,9 @@ class DocumentProcessor:
 
         {json.dumps(chunks, indent=2)}
 
-        For each chunk, generate NO MORE THAN 3 concise user questions someone might ask.
+        For each chunk, generate NO MORE THAN 3 concise user Questions parents might type into a school chatbot to find this content.
         Return only valid JSON with no markdown, no ```json fences, no commentary.
+        If no questions can be generated, return an empty array.
 
         [
         {{"chunk_index": 0, "questions": ["Q1", "Q2", "Q3"]}},
@@ -216,6 +215,7 @@ class DocumentProcessor:
                 try:
                     # Load and chunk the file
                     chunks = self.load_and_chunk(str(file))
+                    continue
                     
                     # Process each chunk
                     for chunk_index, chunk in enumerate(chunks):
