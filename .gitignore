@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 googletoken/node_modules/
 uploader/node_modules/
+uploader_py/venv/
