@@ -64,24 +64,21 @@ class DocumentProcessor:
         # Chunk documents
         chunked_docs = self.text_splitter.split_documents(docs)
         
-        
-        # Group by fileName
-        grouped = defaultdict(list)
-        for chunk in chunked_docs:
-            grouped[chunk.metadata["source"]].append(chunk)
-
-        # Convert back to a normal dict if needed
-        grouped_chunks = dict(grouped)
-        
-        for file_name, chunk_list in grouped_chunks.items():
-            print(f"File: {file_name}")
+        for i in range(0, len(chunked_docs), 5):
+            batch = chunked_docs[i:i+5]
             indexed_chunks = [
                 {"chunk_index": i, "content": chunk.page_content}
-                for i, chunk in enumerate(chunk_list)
+                for i, chunk in enumerate(batch)
             ]
             gen_questions = self.generate_questions_for_chunks(indexed_chunks)
             for gen_question in gen_questions:
-                print(f"File: {gen_question['chunk_index']} Questions: {gen_question['questions']}")
+                batch[gen_question['chunk_index']].metadata['questions'] = gen_question['questions']  
+            for chunk in batch:
+                chunk.metadata['originalContent'] = chunk.page_content
+                final_text = "Content:\n" + chunk.page_content + "\n\nQuestions:\n" + "\n".join(chunk.metadata['questions'])
+                chunk.page_content = final_text
+        return chunked_docs
+
 
 
     def generate_questions_for_chunks(self, chunks):
@@ -113,7 +110,6 @@ class DocumentProcessor:
             model="gpt-4o-mini",
             input=full_input,
             temperature=0.3,
-            max_output_tokens=1500
         )
 
         # Extract JSON text from response
@@ -131,62 +127,6 @@ class DocumentProcessor:
         """Generate a unique ID for each chunk"""
         timestamp = int(time.time() * 1000)  # milliseconds
         return f"{file_name}-{chunk_id}-{timestamp}"
-
-    async def process_folder(self):
-        """Main processing function"""
-        folder_path = Path(self.folder_to_embed)
-        
-        # Get all subdirectories
-        folders = [f for f in folder_path.iterdir() if f.is_dir()]
-        
-        for folder in folders:
-            print(f"Processing folder: {folder.name}")
-            
-            # Get all files in the folder (non-directories only)
-            files = [f for f in folder.iterdir() if f.is_file()]
-            
-            # Create or get collection
-            try:
-                collection = self.client.get_or_create_collection(name=folder.name)
-                print(f"Created/accessed collection: {folder.name}")
-            except Exception as e:
-                print(f"Error creating collection {folder.name}: {e}")
-                continue
-            
-            for file in files:
-                print(f"Processing file: {file.name}")
-                
-                try:
-                    # Load and chunk the file
-                    chunks = self.load_and_chunk(str(file))
-                    continue
-                    
-                    # Process each chunk
-                    for chunk_index, chunk in enumerate(chunks):
-                        chunk_id = chunk_index + 1
-                        text = chunk.page_content
-                        
-                        # Generate embedding
-                        embedding = self.embeddings.embed_query(text)
-                        
-                        # Generate unique ID
-                        doc_id = self.get_new_id(file.name, chunk_id)
-                        
-                        # Add to collection
-                        collection.add(
-                            ids=[doc_id],
-                            embeddings=[embedding],
-                            documents=[text],
-                            metadatas=[{"fileName": file.name}]
-                        )
-                        
-                        print(f"Added chunk {chunk_id} from {file.name}")
-                        
-                except Exception as e:
-                    print(f"Error processing file {file.name}: {e}")
-                    continue
-            
-            print(f"Completed processing folder: {folder.name}")
 
     def process_folder_sync(self):
         """Synchronous version of the main processing function"""
@@ -215,7 +155,6 @@ class DocumentProcessor:
                 try:
                     # Load and chunk the file
                     chunks = self.load_and_chunk(str(file))
-                    continue
                     
                     # Process each chunk
                     for chunk_index, chunk in enumerate(chunks):
@@ -233,7 +172,7 @@ class DocumentProcessor:
                             ids=[doc_id],
                             embeddings=[embedding],
                             documents=[text],
-                            metadatas=[{"fileName": file.name}]
+                            metadatas=[{"fileName": file.name, "questions":json.dumps(chunk.metadata.get('questions', [])), "originalContent": chunk.metadata.get('originalContent', '')}]
                         )
                         
                         print(f"Added chunk {chunk_id} from {file.name}")
