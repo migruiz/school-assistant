@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import OpenAI from "openai";
 import { CloudClient } from "chromadb";
+import { search } from '@/lib/semanticSearch';
 export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
     description: `This tool answers queries related to school policies:
 -   Science Policy: like biological and physical world, scientific ideas 
@@ -22,42 +23,7 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
         userQuery: z.string().describe('The User query'),
     }),
     execute: async ({ userQuery }) => {
-        const chromaClient = new CloudClient();        
-        const openai = new OpenAI({ apiKey: openAIKey });
-
-        const [collection, queryEmbedding] = await Promise.all([
-            chromaClient.getCollection({ name: "policies_t" }),
-            openai.embeddings.create({
-                model: "text-embedding-3-small",
-                input: userQuery
-            })
-        ]);
-
-        const results = await collection.query({
-            queryEmbeddings: [queryEmbedding.data[0].embedding],
-            include:["distances","documents"],
-            nResults: 15,
-        });
-        // 3. Build context from chunks
-        const chunks = results.documents[0]; // documents is an array-of-arrays
-        const context = chunks.join("\n---\n");
-
-        // 4. Ask OpenAI to answer using only these chunks
-        const response = await openai.responses.create({
-            model: "gpt-4o-mini",
-            input: [
-                {
-                    role: "system",
-                    content: "You are a helpful assistant. Answer only using the provided context. If you don't know, say so."
-                },
-                {
-                    role: "user",
-                    content: `Context:\n${context}\n\nQuestion: ${userQuery}`
-                }
-            ]
-        });
-
-
-        return response.output_text;
+        const chunks = await search({ query: userQuery, collectionName: "policies_t", numberOfResults: 15 });
+        return chunks;
     }
 })
