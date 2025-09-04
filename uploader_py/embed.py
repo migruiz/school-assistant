@@ -82,7 +82,7 @@ class DocumentProcessor:
 
 
 
-    def generate_questions_for_chunks(self, chunks):
+    def generate_questions_for_chunks(self, chunks, tries=0):
         """
         Takes a list of text chunks and returns a list of question arrays.
         Each element in the output corresponds to the same index in 'chunks'
@@ -119,8 +119,11 @@ class DocumentProcessor:
         try:
             questions = json.loads(output_text)
         except json.JSONDecodeError:
-            raise ValueError("Model response was not valid JSON:\n" + output_text)
-        
+            if (tries>3):
+                raise ValueError("Model response was not valid JSON:\n" + output_text)
+            else:
+                return self.generate_questions_for_chunks(chunks, tries + 1)
+
         return questions
     
     
