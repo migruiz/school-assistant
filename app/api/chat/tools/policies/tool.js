@@ -22,8 +22,8 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
         userQuery: z.string().describe('The User query'),
     }),
     execute: async ({ userQuery }) => {
-        const chunks = await search({ query: userQuery, collectionName: "policies_t", numberOfResults: 20 });
-        const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 4 });
+        const chunks = await search({ query: userQuery, collectionName: "policies_t", numberOfResults: 25 });
+        const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 5 });
         return refined;
     }
 })
