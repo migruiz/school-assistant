@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
-import OpenAI from "openai";
+import { search } from '@/lib/semanticSearch';
+import { reRank } from '@/lib/reRanker';
 export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
     description: `This tool answers queries related to school policies:
 -   Science Policy: like biological and physical world, scientific ideas 
@@ -20,22 +21,9 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
     inputSchema: z.object({
         userQuery: z.string().describe('The User query'),
     }),
-    execute: async ({ userQuery, }) => {
-        const client = new OpenAI({ apiKey: openAIKey });
-
-        const response = await client.responses.create({
-            model: "gpt-4o-mini",
-            input: userQuery,
-            tools: [
-                {
-                    type: "file_search",
-                    vector_store_ids: [policiesVectorStoreId],
-                },
-            ],
-        });
-
-        const result = response.output_text;
-
-        return result;
+    execute: async ({ userQuery }) => {
+        const chunks = await search({ query: userQuery, collectionName: "policies_t", numberOfResults: 25 });
+        const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 5 });
+        return refined;
     }
 })

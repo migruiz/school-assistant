@@ -1,0 +1,15 @@
+{
+  "name": "school-assistant-uploader",
+  "version": "0.1.0",
+  "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
+    "@chroma-core/openai": "^0.1.7",
+    "@langchain/community": "^0.3.53",
+    "@langchain/core": "^0.3.72",
+    "chromadb": "^3.0.14",
+    "langchain": "^0.3.31",
+    "mammoth": "^1.10.0",
+    "openai": "^5.17.0",
+    "pdf-parse": "^1.1.1"
+  }
+}
