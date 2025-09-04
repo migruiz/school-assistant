@@ -36,7 +36,7 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
         const results = await collection.query({
             queryEmbeddings: [queryEmbedding.data[0].embedding],
             include:["distances","documents"],
-            nResults: 25,
+            nResults: 15,
         });
         // 3. Build context from chunks
         const chunks = results.documents[0]; // documents is an array-of-arrays
