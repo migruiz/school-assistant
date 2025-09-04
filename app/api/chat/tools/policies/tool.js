@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
 import { search } from '@/lib/semanticSearch';
+import { reRank } from '@/lib/reRanker';
 export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
     description: `This tool answers queries related to school policies:
 -   Science Policy: like biological and physical world, scientific ideas 
@@ -21,7 +22,8 @@ export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
         userQuery: z.string().describe('The User query'),
     }),
     execute: async ({ userQuery }) => {
-        const chunks = await search({ query: userQuery, collectionName: "policies_t", numberOfResults: 15 });
-        return chunks;
+        const chunks = await search({ query: userQuery, collectionName: "policies_t", numberOfResults: 20 });
+        const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 4 });
+        return refined;
     }
 })

@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
 import { search } from '@/lib/semanticSearch';
+import { reRank } from '@/lib/reRanker';
 export const getOutOfSchoolTool = ({ openAIKey, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId }) => ({
     description: `This tool answers queries related to out of school activities, like childcare services (breakfast club) and after school programs like STEAM, chess, Dancing Clubs
     If user queries about Lily's then it refers to Childcare services.
@@ -12,11 +13,13 @@ export const getOutOfSchoolTool = ({ openAIKey, childCareServicesDataVectorStore
     execute: async ({ userQuery, types }) => {
         if (types.includes("afterSchool")) {
             const chunks = await search({ query: userQuery, collectionName: "afterschool_t", numberOfResults: 15 });
-            return chunks;
+            const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 3 });
+            return refined;
         }
         if (types.includes("childCare")) {
             const chunks = await search({ query: userQuery, collectionName: "childcare_t", numberOfResults: 15 });
-            return chunks;
+            const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 3 });
+            return refined;
         }
     }
 })
