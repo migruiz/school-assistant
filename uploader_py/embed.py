@@ -147,7 +147,7 @@ class DocumentProcessor:
             
             # Create or get collection
             try:
-                collection = self.client.get_or_create_collection(name=folder.name, metadata={"hnsw:space": "cosine"} )
+                collection = self.client.get_or_create_collection(name=f"{folder.name}_t", metadata={"hnsw:space": "cosine"} )
                 print(f"Created/accessed collection: {folder.name}")
             except Exception as e:
                 print(f"Error creating collection {folder.name}: {e}")
