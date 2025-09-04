@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import OpenAI from "openai";
+import { search } from '@/lib/semanticSearch';
 export const getGeneralInfoTool = ({ openAIKey, generalInfoVectorStoreId }) => ({
     description: `This tool answers queries related to general school information like school address, Mission, Nurture, uniform, books and stationary,
     school bag, lunch box, free hot lunch scheme, nut allergies, tusla, luch time, food policies.
@@ -9,23 +9,8 @@ export const getGeneralInfoTool = ({ openAIKey, generalInfoVectorStoreId }) => (
     inputSchema: z.object({
         userQuery: z.string().describe('The User query'),
     }),
-    execute: async ({ userQuery, }) => {
-        const client = new OpenAI({ apiKey: openAIKey });
-
-        const response = await client.responses.create({
-            model: "gpt-4o-mini",
-            input: userQuery,
-            tools: [
-                {
-                    type: "file_search",
-                    vector_store_ids: [generalInfoVectorStoreId],
-                    max_num_results: 5
-                },
-            ],
-        });
-
-        const result = response.output_text;
-
-        return result;
+    execute: async ({ userQuery }) => {
+        const chunks = await search({ query: userQuery, collectionName: "generalInfo_t", numberOfResults: 15 });
+        return chunks;
     }
 })

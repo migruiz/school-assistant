@@ -1,7 +1,5 @@
 
 import { z } from 'zod';
-import OpenAI from "openai";
-import { CloudClient } from "chromadb";
 import { search } from '@/lib/semanticSearch';
 export const getPoliciesInfoTool = ({ openAIKey, policiesVectorStoreId }) => ({
     description: `This tool answers queries related to school policies:
