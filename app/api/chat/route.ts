@@ -17,7 +17,7 @@ import { getPoliciesInfoTool } from './tools/policies/tool'
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
-  const collectionNameRETNS = "wholeSchoolAnnouncements";
+  const collectionNameRETNS = "wholeSchoolAnnouncements-chunks-langChain";
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId, policiesVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({

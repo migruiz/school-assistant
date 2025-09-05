@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-export async function chunkEmail(openAIKey: string, content: any) {
+export async function chunkEmail(openAIKey: string, content: string) {
     // Initialize OpenAI client with your API key
     const openai = new OpenAI({
         apiKey: openAIKey
