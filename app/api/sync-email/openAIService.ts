@@ -37,7 +37,14 @@ export async function importEmails(openAIKey: string, vectorStoreName: string, e
             {
                 ids: [email.id],
                 embeddings: [embedding],
-                metadatas: [{ "sender": email.sender, "originalSubject": email.subject, "receivedAt": email.receivedAt }],
+                metadatas: [{ 
+                    "sender": email.sender, 
+                    "originalSubject": email.subject, 
+                    "receivedAt": email.receivedAt, 
+                    likelyQuestions:summaryData.likelyQuestions.join("\n") ,
+                    topics:summaryData.topics.join(", "),
+                    extractedSubject: summaryData.newSubject
+                }],
                 documents: [documentForSemanticSearch],
             }
         )
@@ -52,12 +59,9 @@ export async function importEmails(openAIKey: string, vectorStoreName: string, e
 function formatDocumentForSemanticSearch(dataToUpload: any) {
 
     let result = `**Subject**: ${dataToUpload.subject}\n`;
-    result += `**Date**: ${dataToUpload.date}\n`;
     result += `**Topics**: ${dataToUpload.topics}\n`;
     result += `**Body**: \n`;
     result += `${dataToUpload.body}\n`;
-    result += `**Likely Questions**: \n`;
-    result += `${dataToUpload.likelyQuestions.join("\n")}\n`;
 
     return result.trim();
 }
