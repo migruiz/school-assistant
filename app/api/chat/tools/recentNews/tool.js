@@ -16,7 +16,7 @@ export const getRecentNewsTool = ({ collectionName }) => ({
         const startDate = now - (xDaysAgo * 24 * 60 * 60 * 1000);
 
         const results = await collection.get({
-            where: { "receivedAtTS": { "$gte": startDate } }
+            where: { "receivedAtTS": { "$gte": Math.floor(startDate/1000) } }
         });
         // 3. Build context from chunks
         const docs = results.documents; // documents is an array-of-arrays
