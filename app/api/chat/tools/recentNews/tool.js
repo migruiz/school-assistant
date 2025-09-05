@@ -11,15 +11,14 @@ export const getRecentNewsTool = ({ collectionName }) => ({
         const collection = await chromaClient.getCollection({ name: collectionName })
 
 
-        const now = new Date();
-        now.setDate(now.getDate() - xDaysAgo);
-        const startDate = now.toISOString();
+        const now = Date.now();
+        const startDate = now - (xDaysAgo * 24 * 60 * 60 * 1000);
 
         const results = await collection.get({
-            where: { "receivedAt": { "$gte": startDate } }
+            where: { "receivedAtTS": { "$gte": startDate } }
         });
         // 3. Build context from chunks
-        const docs = results.documents[0]; // documents is an array-of-arrays
+        const docs = results.documents; // documents is an array-of-arrays
         return docs;
     }
 })
