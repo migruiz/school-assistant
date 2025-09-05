@@ -69,6 +69,7 @@ async function addChunksToCollection(chunks:any, client: OpenAI, collection:any,
 function formatDocument(email: any) {
 
     let result = `**Subject**: ${email.subject}\n`;
+    result += `**Date**: ${email.receivedAt}\n`;   
     result += `**Body**: \n`;
     result += `${email.body}\n`;
 

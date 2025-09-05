@@ -2,7 +2,8 @@
 import { z } from 'zod';
 import { CloudClient } from "chromadb";
 export const getRecentNewsTool = ({ collectionName }) => ({
-    description: `This tool returns the recent school announcments/news from the last days.`,
+    description: `This tool returns the recent school announcments/news in ASCENDING order from the last days.
+    The most important news are the most recent (The Last items on the list)`,
     inputSchema: z.object({
         xDaysAgo: z.number().describe('How many days ago to look in the past '),
     }),
