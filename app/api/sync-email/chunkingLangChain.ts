@@ -1,7 +1,7 @@
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 export async function chunkEmailUsingLangChain(content: string) {
     const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 800,
+        chunkSize: 1200,
         chunkOverlap: 400,
     });
 
