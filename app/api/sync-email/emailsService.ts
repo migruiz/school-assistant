@@ -78,7 +78,7 @@ export async function getAddedEmails(gmail: gmail_v1.Gmail, newLastHistoryId: st
 
 
 
-export async function getLast3Emails(gmail: gmail_v1.Gmail) {
+export async function getLast30Emails(gmail: gmail_v1.Gmail) {
     let emails: any[] = [];
     const res = await gmail.users.messages.list({
         userId: 'me',
