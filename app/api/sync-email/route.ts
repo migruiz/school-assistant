@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient, updateEmailAccountWithVectorStoreId } from './emailAccountService'
+import { getFirestoreDatabase, getEmailsAccountToSync, getGmailAppCredentials, updateLastHistoryId, getGmailApiClient } from './emailAccountService'
 import { getAddedEmails, getLast30Emails } from './emailsService'
 import { importEmails } from './openAIService'
 import { getSchools } from "./schoolsService"
