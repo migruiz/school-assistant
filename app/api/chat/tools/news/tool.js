@@ -1,12 +1,15 @@
 
 import { z } from 'zod';
-import { performSemanticSearch } from './newsService'
-export const  getNewsTool = ({ openAIKey, vectorStoreId }) => ({
-        description: `
-        This tool searches information in the school news/announcements from the school principal.  
-        The results from this tool may contain metadata sections like **Topics**, **Likely Questions**. IGNORE these sections completely. Only consider the actual content (**Date**, **Body**)`,
-        inputSchema: z.object({
-          query: z.string().describe('The query to search'),
-        }),        
-        execute: async ({ query }) => await performSemanticSearch({ openAIKey, query, vectorStoreId }),
-      })
+import { search } from '@/lib/semanticSearch';
+import { reRank } from '@/lib/reRanker';
+export const getSearchNewsTool = ({ openAIKey, collectionName }) => ({
+    description: `This tool searches information in the school news/announcements from the school principal.`,
+    inputSchema: z.object({
+        userQuery: z.string().describe('The User query'),
+    }),
+    execute: async ({ userQuery }) => {
+        const chunks = await search({ query: userQuery, collectionName, numberOfResults: 25 });
+        const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 5 });
+        return refined;
+    }
+})

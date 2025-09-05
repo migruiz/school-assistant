@@ -1,77 +1,77 @@
 import OpenAI, { Uploadable } from "openai";
-import {summarizeForSemanticSearch} from './summarizerService'
-export async function importEmails(openAIKey: string, vectorStoreId: string, vectorStoreName: string, emails: any) {
+import { summarizeForSemanticSearch } from './summarizerService'
+import { chunkEmail } from "./chunkingService";
+import { chunkEmailUsingLangChain } from "./chunkingLangChain";
+import { CloudClient } from "chromadb";
+export async function importEmails(openAIKey: string, vectorStoreName: string, emails: any) {
     if (emails.length === 0) {
         return null;
     }
     const client = new OpenAI({ apiKey: openAIKey });
+    const chromaClient = new CloudClient();
 
-    let vectorStore;
-    let createdVectorStoreId = null;
-    if (!vectorStoreId) {
-        vectorStore = await client.vectorStores.create({   // Create vector store
-            name: vectorStoreName,
-            /*chunking_strategy:{
-                type:'static',
-                static:{
-                    chunk_overlap_tokens:0,
-                    max_chunk_size_tokens:4096
-                }
-            }*/
-        });
-        createdVectorStoreId = vectorStore.id;
-    }
-    else {
-        vectorStore = await client.vectorStores.retrieve(vectorStoreId);
-    }
-
+    const collection = await chromaClient.getOrCreateCollection({
+        name: `${vectorStoreName}-chunks-langChain`,
+        metadata: { "hnsw:space": "cosine" }
+    });
+    const originalsCollection = await chromaClient.getOrCreateCollection({
+        name: `${vectorStoreName}-originals`
+    });
 
     for (const email of emails.reverse()) {
-        const summaryData = await summarizeForSemanticSearch(openAIKey, {
-            subject: email.subject,
-            body: email.body
-        });
-        const dataToUpload = {
-            date: email.receivedAt,
-            subject: summaryData.newSubject,
-            eventUpdates: summaryData.eventUpdates,
-            topics: summaryData.topics.join(", "),
-            body: email.body,
-            likelyQuestions:summaryData.likelyQuestions
-            
-        };        
-        const documentForSemanticSearch = formatDocumentForSemanticSearch(dataToUpload);
-        const fileToUpload: Uploadable = new File([documentForSemanticSearch], `${email.subject} - ${email.id}.json`, { type: "application/json" });
-        const uploadedFile = await client.vectorStores.files.uploadAndPoll(
-            vectorStore.id,
-            fileToUpload
-        );
-
-        const attributesUploaded  = await client.vectorStores.files.update(uploadedFile.id, {
-            vector_store_id: vectorStore.id,
-            attributes: {
-                sender: email.sender,
-                originalSubject: email.subject,
-                receivedAt: new Date(email.receivedAt).getTime(),
-            },
-        });
-        console.log("Uploaded Data:", JSON.stringify(documentForSemanticSearch, null, 2));
-        console.log("Result:", JSON.stringify({uploadedFile, attributesUploaded}, null, 2));
+        const chunks = await chunkEmailUsingLangChain(email.body);
+        await addOriginalToCollection(client,originalsCollection,email)
+        await addChunksToCollection(chunks, client, collection, email);
     }
 
 
-    return createdVectorStoreId;
 }
 
-function formatDocumentForSemanticSearch(dataToUpload:any) {
+async function addOriginalToCollection(client: OpenAI, collection:any, email: any) {
+    const content = formatDocument(email)
+        await collection.add(
+            {
+                ids: [`${email.subject} - ${email.id}`],
+                metadatas: [{
+                    "sender": email.sender,
+                    "originalSubject": email.subject,
+                    "receivedAt":  email.receivedAt,
+                    "receivedAtTS":  new Date(email.receivedAt).getTime(),
+                }],
+                documents: [content],
+            }
+        );
+}
 
-  let result = `**Subject**: ${dataToUpload.subject}\n`;
-    result += `**Date**: ${dataToUpload.date}\n`;    
-    result += `**Topics**: ${dataToUpload.topics}\n`;
+async function addChunksToCollection(chunks:any, client: OpenAI, collection:any, email: any) {
+    for (const chunk of chunks) {
+        const embeddingResponse = await client.embeddings.create({
+            model: "text-embedding-3-small",
+            input: chunk.pageContent
+        });
+        const embedding = embeddingResponse.data[0].embedding;
+        await collection.add(
+            {
+                ids: [`${email.subject} - ${email.id} - ${chunks.indexOf(chunk)}`],
+                embeddings: [embedding],
+                metadatas: [{
+                    "sender": email.sender,
+                    "originalSubject": email.subject,
+                    "receivedAt": email.receivedAt,
+                    chunkData: JSON.stringify(chunk.metadata)
+                }],
+                documents: [chunk.pageContent],
+            }
+        );
+    }
+}
+
+function formatDocument(email: any) {
+
+    let result = `**Subject**: ${email.subject}\n`;
+    result += `**Date**: ${email.receivedAt}\n`;   
     result += `**Body**: \n`;
-    result += `${dataToUpload.body}\n`;
-    result += `**Likely Questions**: \n`;
-    result += `${dataToUpload.likelyQuestions.join("\n")}\n`;
+    result += `${email.body}\n`;
 
-  return result.trim();
+    return result.trim();
 }

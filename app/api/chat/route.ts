@@ -9,15 +9,16 @@ import {
 } from "ai";
 import { getFirestoreDatabase, getSchoolInfo } from './openAIDataService'
 import { getSchoolCalendarTool } from './tools/schoolCalendar/tool'
-import { getNewsTool } from './tools/news/tool'
+import { getSearchNewsTool } from './tools/news/tool'
 import { getOutOfSchoolTool } from './tools/outOfSchool/tool'
 import { getGeneralInfoTool } from './tools/generalInfo/tool'
 import { getPoliciesInfoTool } from './tools/policies/tool'
+import {getRecentNewsTool} from './tools/recentNews/tool'
 
 export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
-  const vectorStoreId = "vs_68b4bb1b5ee08191ac76013fde8753f2";
+  const collectionNameRETNS = "wholeSchoolAnnouncements";
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId, policiesVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
@@ -42,7 +43,8 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
-      schoolNews: tool(getNewsTool({ openAIKey, vectorStoreId })),
+      recentNews: tool(getRecentNewsTool({collectionName:`${collectionNameRETNS}-originals`})),
+      searchNews: tool(getSearchNewsTool({ openAIKey, collectionName:`${collectionNameRETNS}-chunks-langChain`})),
       schoolCalendar: tool(getSchoolCalendarTool({ openAIKey, schoolCalendar })),
       outOfSchool: tool(getOutOfSchoolTool({ openAIKey, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId })),
       generalInfo: tool(getGeneralInfoTool({ openAIKey, generalInfoVectorStoreId })),
