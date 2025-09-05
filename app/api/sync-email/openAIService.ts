@@ -14,44 +14,62 @@ export async function importEmails(openAIKey: string, vectorStoreName: string, e
         name: `${vectorStoreName}-chunks-langChain`,
         metadata: { "hnsw:space": "cosine" }
     });
+    const originalsCollection = await chromaClient.getOrCreateCollection({
+        name: `${vectorStoreName}-originals`
+    });
 
     for (const email of emails.reverse()) {
         const chunks = await chunkEmailUsingLangChain(email.body);
-        for (const chunk of chunks) {
-            const embeddingResponse = await client.embeddings.create({
-                model: "text-embedding-3-small",
-                input: chunk.pageContent
-            })
-            const embedding = embeddingResponse.data[0].embedding;
-            await collection.add(
-                {
-                    ids: [`${email.subject} - ${email.id} - ${chunks.indexOf(chunk)}`],
-                    embeddings: [embedding],
-                    metadatas: [{
-                        "sender": email.sender,
-                        "originalSubject": email.subject,
-                        "receivedAt": email.receivedAt,
-                        chunkData: JSON.stringify(chunk.metadata)
-                    }],
-                    documents: [chunk.pageContent],
-                }
-            )
-        }
-
-
-
-
+        await addOriginalToCollection(client,originalsCollection,email)
+        await addChunksToCollection(chunks, client, collection, email);
     }
 
 
 }
 
-function formatDocumentForSemanticSearch(dataToUpload: any) {
+async function addOriginalToCollection(client: OpenAI, collection:any, email: any) {
+    const content = formatDocument(email)
+        await collection.add(
+            {
+                ids: [`${email.subject} - ${email.id}`],
+                metadatas: [{
+                    "sender": email.sender,
+                    "originalSubject": email.subject,
+                    "receivedAt": email.receivedAt,
+                }],
+                documents: [content],
+            }
+        );
+}
 
-    let result = `**Subject**: ${dataToUpload.subject}\n`;
-    result += `**Topics**: ${dataToUpload.topics}\n`;
+async function addChunksToCollection(chunks:any, client: OpenAI, collection:any, email: any) {
+    for (const chunk of chunks) {
+        const embeddingResponse = await client.embeddings.create({
+            model: "text-embedding-3-small",
+            input: chunk.pageContent
+        });
+        const embedding = embeddingResponse.data[0].embedding;
+        await collection.add(
+            {
+                ids: [`${email.subject} - ${email.id} - ${chunks.indexOf(chunk)}`],
+                embeddings: [embedding],
+                metadatas: [{
+                    "sender": email.sender,
+                    "originalSubject": email.subject,
+                    "receivedAt": email.receivedAt,
+                    chunkData: JSON.stringify(chunk.metadata)
+                }],
+                documents: [chunk.pageContent],
+            }
+        );
+    }
+}
+
+function formatDocument(email: any) {
+
+    let result = `**Subject**: ${email.subject}\n`;
     result += `**Body**: \n`;
-    result += `${dataToUpload.body}\n`;
+    result += `${email.body}\n`;
 
     return result.trim();
 }
