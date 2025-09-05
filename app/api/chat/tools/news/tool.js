@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { search } from '@/lib/semanticSearch';
 import { reRank } from '@/lib/reRanker';
-export const getNewsTool = ({ openAIKey, collectionName }) => ({
+export const getSearchNewsTool = ({ openAIKey, collectionName }) => ({
     description: `This tool searches information in the school news/announcements from the school principal.`,
     inputSchema: z.object({
         userQuery: z.string().describe('The User query'),

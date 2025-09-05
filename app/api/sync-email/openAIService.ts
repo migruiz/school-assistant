@@ -35,7 +35,8 @@ async function addOriginalToCollection(client: OpenAI, collection:any, email: an
                 metadatas: [{
                     "sender": email.sender,
                     "originalSubject": email.subject,
-                    "receivedAt": email.receivedAt,
+                    "receivedAt":  email.receivedAt,
+                    "receivedAtTS":  new Date(email.receivedAt).getTime(),
                 }],
                 documents: [content],
             }
