@@ -35,7 +35,7 @@ export async function importEmails(openAIKey: string, vectorStoreName: string, e
         const embedding = embeddingResponse.data[0].embedding;
         await collection.add(
             {
-                ids: [email.id],
+                ids: [`${email.subject} - ${email.id}`],
                 embeddings: [embedding],
                 metadatas: [{ 
                     "sender": email.sender, 
