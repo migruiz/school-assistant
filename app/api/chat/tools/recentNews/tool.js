@@ -12,7 +12,7 @@ export const getRecentNewsTool = ({ schoolNewsCollection, userAllowedSchoolClass
         schoolClass: z.enum(["juniorInfants", "1stClass", "2ndClass", "3rdClass"])
             .nullable()
             .optional()
-            .describe("List of school classes to filter by. [] if not school class queried"),
+            .describe("School Class to filter, null if not specified"),
     }),
     execute: async ({ xDaysAgo, schoolClass }) => {
         const chromaClient = new CloudClient();
