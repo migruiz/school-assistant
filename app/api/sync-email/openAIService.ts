@@ -11,7 +11,7 @@ export async function importEmails(openAIKey: string, vectorStoreName: string, e
     const chromaClient = new CloudClient();
 
     const collection = await chromaClient.getOrCreateCollection({
-        name: `${vectorStoreName}-chunks-langChain`,
+        name: `${vectorStoreName}-chunks-recursive`,
         metadata: { "hnsw:space": "cosine" }
     });
     const originalsCollection = await chromaClient.getOrCreateCollection({
