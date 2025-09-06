@@ -19,6 +19,7 @@ export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
   const collectionNameRETNS = "wholeSchoolAnnouncements";
+  const userAllowedSchoolClasses = ["JuniorInfants","3rdClass"]
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId, policiesVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
-      recentNews: tool(getRecentNewsTool({collectionName:`${collectionNameRETNS}-originals`})),
+      recentNews: tool(getRecentNewsTool({schoolNewsCollection:collectionNameRETNS, userAllowedSchoolClasses})),
       searchNews: tool(getSearchNewsTool({ openAIKey, collectionName:`${collectionNameRETNS}-chunks-langChain`})),
       schoolCalendar: tool(getSchoolCalendarTool({ openAIKey, schoolCalendar })),
       outOfSchool: tool(getOutOfSchoolTool({ openAIKey, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId })),
