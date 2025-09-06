@@ -19,6 +19,7 @@ export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
   const collectionNameRETNS = "wholeSchoolAnnouncements";
+  const userAllowedSchoolClasses = ["juniorInfants","3rdClass"]
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId, policiesVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
     system: `
 - Assist parents of Rathcoole Educate Together National School by providing accurate answers to school queries.
 - Use the tools provided to find accurate information to answer the query.
+- When using the "searchNews" tool, use the schoolClassName in the searchResults to explain to the user where did you find the news.
 - Ensure responses are clear, concise, and easy for parents to understand.
 - Do not provide personal opinions.
 - Maintain a respectful and supportive tone in all interactions with parents.
@@ -43,8 +45,8 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
-      recentNews: tool(getRecentNewsTool({collectionName:`${collectionNameRETNS}-originals`})),
-      searchNews: tool(getSearchNewsTool({ openAIKey, collectionName:`${collectionNameRETNS}-chunks-langChain`})),
+      recentNews: tool(getRecentNewsTool({userAllowedSchoolClasses})),
+      searchNews: tool(getSearchNewsTool({ openAIKey,userAllowedSchoolClasses} )),
       schoolCalendar: tool(getSchoolCalendarTool({ openAIKey, schoolCalendar })),
       outOfSchool: tool(getOutOfSchoolTool({ openAIKey, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId })),
       generalInfo: tool(getGeneralInfoTool({ openAIKey, generalInfoVectorStoreId })),
