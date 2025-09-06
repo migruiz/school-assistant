@@ -20,15 +20,15 @@ export const getRecentNewsTool = ({ schoolNewsCollection, userAllowedSchoolClass
             if (userAllowedSchoolClasses.includes(schoolClass)) {
                 //const classNewsCollectionName = `${schoolClass}-originals`
                 let classNewsCollectionName = getSchoolClassCollectionName(schoolClass);
-                return await extractNews(chromaClient, classNewsCollectionName, xDaysAgo);
+                return await extractNews(chromaClient, classNewsCollectionName,schoolClass, xDaysAgo);
             }
             else {
                 return "Sorry, You don't have access to this School Class News"
             }
         }
         else {
-            const allSchoolNewsPromise = extractNews(chromaClient, `${schoolNewsCollection}-originals`, xDaysAgo)
-            const userAllowedClassesQueriesPromises = userAllowedSchoolClasses.map(s => extractNews(chromaClient, getSchoolClassCollectionName(s), xDaysAgo))
+            const allSchoolNewsPromise = extractNews(chromaClient, `${schoolNewsCollection}-originals`, "Whole School", xDaysAgo)
+            const userAllowedClassesQueriesPromises = userAllowedSchoolClasses.map(s => extractNews(chromaClient, getSchoolClassCollectionName(s),s, xDaysAgo))
             const myNews = await Promise.all([
                 allSchoolNewsPromise,
                 ...userAllowedClassesQueriesPromises
@@ -50,7 +50,7 @@ function getSchoolClassCollectionName(schoolClass) {
     return classNewsCollectionName;
 }
 
-async function extractNews(chromaClient, classNewsCollectionName, xDaysAgo) {
+async function extractNews(chromaClient, classNewsCollectionName, schoolClassName, xDaysAgo) {
     const collection = await chromaClient.getCollection({ name: classNewsCollectionName });
 
 
@@ -61,6 +61,9 @@ async function extractNews(chromaClient, classNewsCollectionName, xDaysAgo) {
         where: { "receivedAtTS": { "$gte": Math.floor(startDate / 1000) } }
     });
     // 3. Build context from chunks
-    const docs = results.documents; // documents is an array-of-arrays
-    return docs;
+    const news = results.documents; // documents is an array-of-arrays
+    return {
+        schoolClassName
+        , news
+    }
 }
