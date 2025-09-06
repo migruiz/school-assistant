@@ -44,8 +44,8 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
-      recentNews: tool(getRecentNewsTool({schoolNewsCollection:collectionNameRETNS, userAllowedSchoolClasses})),
-      searchNews: tool(getSearchNewsTool({ openAIKey, collectionName:`${collectionNameRETNS}-chunks-langChain`})),
+      recentNews: tool(getRecentNewsTool({userAllowedSchoolClasses})),
+      searchNews: tool(getSearchNewsTool({ openAIKey,userAllowedSchoolClasses} )),
       schoolCalendar: tool(getSchoolCalendarTool({ openAIKey, schoolCalendar })),
       outOfSchool: tool(getOutOfSchoolTool({ openAIKey, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId })),
       generalInfo: tool(getGeneralInfoTool({ openAIKey, generalInfoVectorStoreId })),

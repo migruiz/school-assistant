@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 import { CloudClient } from "chromadb";
-export const getRecentNewsTool = ({ schoolNewsCollection, userAllowedSchoolClasses }) => ({
+export const getRecentNewsTool = ({ userAllowedSchoolClasses }) => ({
     description: `This tool returns the recent school announcments/news in ASCENDING order from the last days.
     The most important news are the most recent (The Last items on the list)
     The user could ask for news of a specific school class i.e "Recent news from Junior Infants" => schoolClass = "juniorInfants"
