@@ -19,38 +19,48 @@ export const getRecentNewsTool = ({ schoolNewsCollection, userAllowedSchoolClass
         if (schoolClass) {
             if (userAllowedSchoolClasses.includes(schoolClass)) {
                 //const classNewsCollectionName = `${schoolClass}-originals`
-                const classNewsCollectionName='juniorclassannouncments-originals'
-                const collection = await chromaClient.getCollection({ name: classNewsCollectionName })
-
-
-                const now = Date.now();
-                const startDate = now - (xDaysAgo * 24 * 60 * 60 * 1000);
-
-                const results = await collection.get({
-                    where: { "receivedAtTS": { "$gte": Math.floor(startDate / 1000) } }
-                });
-                // 3. Build context from chunks
-                const docs = results.documents; // documents is an array-of-arrays
-                return docs;
+                let classNewsCollectionName = getSchoolClassCollectionName(schoolClass);
+                return await extractNews(chromaClient, classNewsCollectionName, xDaysAgo);
             }
             else {
                 return "Sorry, You don't have access to this School Class News"
             }
         }
         else {
-            const schoolNewsCollectionName = `${schoolNewsCollection}-originals`
-            const collection = await chromaClient.getCollection({ name: schoolNewsCollectionName })
+            const allSchoolNewsPromise = extractNews(chromaClient, `${schoolNewsCollection}-originals`, xDaysAgo)
+            const userAllowedClassesQueriesPromises = userAllowedSchoolClasses.map(s => extractNews(chromaClient, getSchoolClassCollectionName(s), xDaysAgo))
+            const myNews = await Promise.all([
+                allSchoolNewsPromise,
+                ...userAllowedClassesQueriesPromises
+            ]);
 
-
-            const now = Date.now();
-            const startDate = now - (xDaysAgo * 24 * 60 * 60 * 1000);
-
-            const results = await collection.get({
-                where: { "receivedAtTS": { "$gte": Math.floor(startDate / 1000) } }
-            });
-            // 3. Build context from chunks
-            const docs = results.documents; // documents is an array-of-arrays
-            return docs;
+            return myNews;
         }
     }
 })
+
+function getSchoolClassCollectionName(schoolClass) {
+    let classNewsCollectionName;
+    if (schoolClass == "JuniorInfants") {
+        classNewsCollectionName = 'juniorclassannouncments-originals';
+    }
+    else if (schoolClass == "3rdClass") {
+        classNewsCollectionName = '3rdclassannouncments-originals';
+    }
+    return classNewsCollectionName;
+}
+
+async function extractNews(chromaClient, classNewsCollectionName, xDaysAgo) {
+    const collection = await chromaClient.getCollection({ name: classNewsCollectionName });
+
+
+    const now = Date.now();
+    const startDate = now - (xDaysAgo * 24 * 60 * 60 * 1000);
+
+    const results = await collection.get({
+        where: { "receivedAtTS": { "$gte": Math.floor(startDate / 1000) } }
+    });
+    // 3. Build context from chunks
+    const docs = results.documents; // documents is an array-of-arrays
+    return docs;
+}
