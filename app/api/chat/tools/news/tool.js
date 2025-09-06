@@ -14,24 +14,28 @@ export const getSearchNewsTool = ({ openAIKey, userAllowedSchoolClasses }) => ({
     execute: async ({ userQuery, schoolClass }) => {
         if (schoolClass) {
             if (userAllowedSchoolClasses.includes(schoolClass)) {
-                const chunks = await search({ query: userQuery, schoolClass, numberOfResults: 25 });
-                const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 5 });
-                return refined;
+                return await searchAndReRank({openAIKey, query:userQuery, schoolClass, numberOfChunks:25, rankTopK:5})
             }
             else {
                 return "Sorry, You don't have access to this School Class News"
             }
         } else {
-            const allSchoolNewsPromise = search({ query: userQuery, schoolClass: "allSchool", numberOfResults: 25 })
-            const userAllowedClassesQueriesPromises = userAllowedSchoolClasses.map(s => search({schoolClass:s,  query: userQuery, numberOfResults: 25 }))
-            const myNewsChunks = await Promise.all([
+            const allSchoolNewsPromise = searchAndReRank({openAIKey, query:userQuery, schoolClass:"allSchool", numberOfChunks:25, rankTopK:5})
+            const userAllowedClassesNewsPromises = userAllowedSchoolClasses.map(s => searchAndReRank({openAIKey, query:userQuery, schoolClass:s, numberOfChunks:25, rankTopK:5}))
+            const filteredNewsLists = await Promise.all([
                 allSchoolNewsPromise,
-                ...userAllowedClassesQueriesPromises
+                ...userAllowedClassesNewsPromises
             ]);
-            const chunks = myNewsChunks.flat()
-            const refined = await reRank({ openAIKey, query: userQuery, semanticSearchResults: chunks, topK: 5 });
-                return refined;
+            const filteredNews = filteredNewsLists.flat()
+            return filteredNews;
         }
 
     }
 })
+
+const searchAndReRank = async ({openAIKey, query, schoolClass, numberOfChunks,rankTopK }) => {
+    const chunks = await search({ query, schoolClass, numberOfResults:numberOfChunks });
+    const refined = await reRank({ openAIKey, query, semanticSearchResults: chunks, topK:rankTopK });
+    return refined;
+
+}
