@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const db = await getFirestoreDatabase();
   const schoolId = "retns";
   const collectionNameRETNS = "wholeSchoolAnnouncements";
-  const userAllowedSchoolClasses = ["JuniorInfants","3rdClass"]
+  const userAllowedSchoolClasses = ["juniorInfants","3rdClass"]
   const { openAIKey, schoolCalendar, generalInfoVectorStoreId, childCareServicesDataVectorStoreId, afterSchoolDataVectorStoreId, policiesVectorStoreId } = await getSchoolInfo(db, schoolId);
   const { messages }: { messages: UIMessage[] } = await req.json();
   const result = streamText({
